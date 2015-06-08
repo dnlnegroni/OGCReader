@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        jar="/Users/daniele/Desktop/QRCodeReaderView-master 2/QR-ReaderExample/qRReaderExample/build/intermediates/exploded-aar/com.dlazaro66.qrcodereaderview/qrcodereaderview/1.0.0/libs/core.jar"
+        jumboMode="false"
+        revision="21.1.2"
+        sha1="f3c7e89b5124329cddba83bcf7c26c1c636c16b8">
+        <dex dex="/Users/daniele/Desktop/QRCodeReaderView-master 2/QR-ReaderExample/qRReaderExample/build/intermediates/pre-dexed/debug/core-ac7eae676197204598559970831efbca10d74bde.jar" />
+    </item>
+    <item
+        jar="/Users/daniele/Desktop/QRCodeReaderView-master 2/QR-ReaderExample/qRReaderExample/build/intermediates/exploded-aar/com.dlazaro66.qrcodereaderview/qrcodereaderview/1.0.0/classes.jar"
+        jumboMode="false"
+        revision="21.1.2"
+        sha1="cd3f0aeca8f8e53d60cad6597e69d5d753fb0360">
+        <dex dex="/Users/daniele/Desktop/QRCodeReaderView-master 2/QR-ReaderExample/qRReaderExample/build/intermediates/pre-dexed/debug/classes-3b0853b55e16a28b77db69b8dbff282be6b396ec.jar" />
+    </item>
+
+</items>
