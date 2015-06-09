@@ -7,17 +7,14 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
-import android.view.View;
 import android.widget.ImageView;
 
 import com.google.zxing.BinaryBitmap;
@@ -29,6 +26,7 @@ import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
 import com.google.zxing.client.android.camera.open.CameraManager;
 import com.google.zxing.common.HybridBinarizer;
+import com.google.zxing.common.PerspectiveTransform;
 import com.google.zxing.qrcode.QRCodeReader;
 
 import java.io.IOException;
@@ -251,28 +249,47 @@ public class QRCodeReaderView extends SurfaceView implements Callback,Camera.Pre
 			wallpath.moveTo(one.x, one.y); // used for first point
 			wallpath.lineTo(two.x, two.y);
 			wallpath.lineTo(three.x, three.y);
-			wallpath.lineTo(four.x+0.1f*(four.x-two.x), four.y+0.1f*(four.y-two.y));
+			four.x = four.x + 0.1f * (four.x - two.x);
+			four.y = four.y + 0.1f * (four.y - two.y);
+			wallpath.lineTo(four.x,four.y);
 			wallpath.lineTo(one.x, one.y); // there is a setLastPoint action but i found it not to work as expected
 			canvas.drawPath(wallpath, wallpaint);
-			RenderedOp dest;
-
-
-/*			for (int x=0;x<SX;x++) {
-				for (int y=0;y<SY;y++) {
-					int pixel = bitmap.getPixel(x, y);
-					int redValue = Color.red(pixel);
-					int blueValue = Color.blue(pixel);
-					int greenValue = Color.green(pixel);
-					PointF newPoint = corPix((int)two.x, (int)two.y, (int)three.x, (int)three.y, (int)four.x, (int)four.y, (int)one.x, (int)one.y, x, y);
-					p.setColor(pixel);
-
-					canvas.drawPoint(newPoint.x,newPoint.y,p);
-				}*/
+//			RenderedOp dest;
+			Date startime = new Date();
+			Log.d("PerspectiveDrawing","start drawing at:" + startime.toString());
+			PerspectiveTransform trans = PerspectiveTransform.quadrilateralToQuadrilateral(0,SY,0,0,SX,0,SX,SY,one.x,one.y,two.x,two.y,three.x,three.y,four.x,four.y);
+			float[] points = new float[2*SX*SY];
+			for(int i = 0; i < points.length ; i+=2){
+				points[i] = (float)Math.floor(i/2)%SY;//x
+				points[i+1] = (float)Math.floor(Math.floor(i/2)/SY);//y
 			}
+			trans.transformPoints(points);
+			for(int i = 0; i < points.length ; i+=2){
+				int imagex =(int)Math.floor(i/2)%SY;//x
+				int imagey = (int)Math.floor(Math.floor(i/2)/SY);//y
+				float screenx = points[i];
+				float screeny = points[i+1];
+				int colorofpixel = bitmap.getPixel(imagex, imagey);
+				p.setColor(colorofpixel);
+				canvas.drawPoint(screenx,screeny,p);
+			}
+			Log.d("PerspectiveDrawing","finished drawing after :" +((new Date()).getTime()-startime.getTime()) + " ms");
+//			for (int x=0;x<SX;x++) {
+//				for (int y=0;y<SY;y++) {
+//					int pixel = bitmap.getPixel(x, y);
+//					int redValue = Color.red(pixel);
+//					int blueValue = Color.blue(pixel);
+//					int greenValue = Color.green(pixel);
+//					PointF newPoint = corPix((int)two.x, (int)two.y, (int)three.x, (int)three.y, (int)four.x, (int)four.y, (int)one.x, (int)one.y, x, y);
+//					p.setColor(pixel);
+//
+//					canvas.drawPoint(newPoint.x,newPoint.y,p);
+//				}
+//			}
 
 
 
-			invalidate();
+//			invalidate();
 		}
 	}
 
