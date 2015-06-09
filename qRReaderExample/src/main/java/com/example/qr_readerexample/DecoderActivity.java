@@ -112,12 +112,10 @@ public class DecoderActivity extends Activity implements OnQRCodeReadListener {
 			Log.i("info", "torch is turn on!");
 			p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
 			camera.setParameters(p);
-			camera.startPreview();
 		} else {
 			Log.i("info", "torch is turn off!");
 			p.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
 			camera.setParameters(p);
-			camera.stopPreview();
 		}
 	}
 
