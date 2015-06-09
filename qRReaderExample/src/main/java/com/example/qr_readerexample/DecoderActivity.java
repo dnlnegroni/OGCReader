@@ -1,8 +1,11 @@
 package com.example.qr_readerexample;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Canvas;
 import android.graphics.PointF;
+import android.hardware.Camera;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -11,6 +14,8 @@ import android.view.animation.LinearInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ToggleButton;
+
 import com.example.qr_readerexample.QRCodeReaderView.OnQRCodeReadListener;
 
 
@@ -19,12 +24,31 @@ public class DecoderActivity extends Activity implements OnQRCodeReadListener {
     private TextView myTextView;
 	private QRCodeReaderView mydecoderview;
 	private ImageView line_image;
+	private ToggleButton button;
+	private final Context context = this;
+
+	/**
+	 * @see android.app.Activity#onStop()
+	 */
+	@Override
+	protected void onStop() {
+		Camera camera = mydecoderview.getCameraManager().getCamera();
+		super.onStop();
+		if (camera != null) {
+			camera.release();
+		}
+	}
 
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_decoder);
-        
+		button = (ToggleButton) findViewById(R.id.togglebutton);
+		final PackageManager pm = context.getPackageManager();
+
+		// ?? Ci va veramente ??
+		//camera = Camera.open();
+
         mydecoderview = (QRCodeReaderView) findViewById(R.id.qrdecoderview);
         mydecoderview.setOnQRCodeReadListener(this);
         mydecoderview.setWillNotDraw(false);
@@ -33,15 +57,15 @@ public class DecoderActivity extends Activity implements OnQRCodeReadListener {
         line_image = (ImageView) findViewById(R.id.red_line_image);
         
         TranslateAnimation mAnimation = new TranslateAnimation(
-                TranslateAnimation.ABSOLUTE, 0f,
-                TranslateAnimation.ABSOLUTE, 0f,
-                TranslateAnimation.RELATIVE_TO_PARENT, 0f,
-                TranslateAnimation.RELATIVE_TO_PARENT, 0.5f);
-       mAnimation.setDuration(1000);
-       mAnimation.setRepeatCount(-1);
-       mAnimation.setRepeatMode(Animation.REVERSE);
-       mAnimation.setInterpolator(new LinearInterpolator());
-       line_image.setAnimation(mAnimation);
+			TranslateAnimation.ABSOLUTE, 0f,
+			TranslateAnimation.ABSOLUTE, 0f,
+			TranslateAnimation.RELATIVE_TO_PARENT, 0f,
+			TranslateAnimation.RELATIVE_TO_PARENT, 0.5f);
+	   	mAnimation.setDuration(1000);
+	   	mAnimation.setRepeatCount(-1);
+	   	mAnimation.setRepeatMode(Animation.REVERSE);
+	   	mAnimation.setInterpolator(new LinearInterpolator());
+	   	line_image.setAnimation(mAnimation);
         
     }
 
@@ -79,5 +103,22 @@ public class DecoderActivity extends Activity implements OnQRCodeReadListener {
 		mydecoderview.getCameraManager().stopPreview();
 	}
 
+	public void onToggleClicked(View view) {
+		Camera camera = mydecoderview.getCameraManager().getCamera();
+		PackageManager pm = context.getPackageManager();
+		final Camera.Parameters p = camera.getParameters();
+		boolean on = ((ToggleButton) view).isChecked();
+		if (on) {
+			Log.i("info", "torch is turn on!");
+			p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+			camera.setParameters(p);
+			camera.startPreview();
+		} else {
+			Log.i("info", "torch is turn off!");
+			p.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+			camera.setParameters(p);
+			camera.stopPreview();
+		}
+	}
 
 }

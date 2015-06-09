@@ -29,4 +29,14 @@
         android:layout_below="@+id/exampleTextView"
         android:src="@drawable/red_line" />
 
+    <ToggleButton
+        android:id="@+id/togglebutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="20dp"
+        android:onClick="onToggleClicked"
+        android:textOff="Turn Flashlight on"
+        android:textOn="Turn Flashlight off"/>
+
 </RelativeLayout><!-- From: file:/Users/daniele/Desktop/QRCodeReaderView-master%202/QR-ReaderExample/qRReaderExample/src/main/res/layout/activity_decoder.xml -->

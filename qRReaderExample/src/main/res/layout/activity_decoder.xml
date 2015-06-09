@@ -18,7 +18,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"
-        android:text="Large Text"
+        android:text=""
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <ImageView
@@ -28,5 +28,15 @@
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/exampleTextView"
         android:src="@drawable/red_line" />
+
+    <ToggleButton
+        android:id="@+id/togglebutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="20dp"
+        android:onClick="onToggleClicked"
+        android:textOff="Turn Flashlight on"
+        android:textOn="Turn Flashlight off"/>
 
 </RelativeLayout>

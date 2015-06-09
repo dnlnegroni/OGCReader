@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
+import android.view.View;
 
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.ChecksumException;
@@ -169,8 +170,7 @@ public class QRCodeReaderView extends SurfaceView implements Callback,Camera.Pre
 				Log.d("Pointthree" , three.toString());
 				Log.d("Pointfour" , four.toString());
 
-
-					mOnQRCodeReadListener.onQRCodeRead(result.getText(), transformedPoints);
+				mOnQRCodeReadListener.onQRCodeRead(result.getText(), transformedPoints);
 
 
 			} else {
