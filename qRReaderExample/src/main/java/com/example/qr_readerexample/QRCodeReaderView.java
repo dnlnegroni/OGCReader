@@ -12,12 +12,15 @@ import android.graphics.drawable.BitmapDrawable;
 import android.hardware.Camera;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.example.qr_readerexample.com.example.qr_readerexample.interseption.Point;
+import com.example.qr_readerexample.com.example.qr_readerexample.interseption.Polygon;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.ChecksumException;
 import com.google.zxing.FormatException;
@@ -60,7 +63,16 @@ import java.util.List;
  *
  * @author David L�zaro
  */
-public class QRCodeReaderView extends SurfaceView implements Callback,Camera.PreviewCallback {
+public class QRCodeReaderView extends SurfaceView implements View.OnTouchListener,Callback,Camera.PreviewCallback {
+
+	@Override
+	public boolean onTouch(View v, MotionEvent event) {
+		Log.d("Touched" , "x" + event.getX()+"y" + event.getX());
+		if(one != null && two != null  && three != null  && four != null && IsPointInsideRegion(event.getX(),event.getY())){
+			Log.d("Toouched","inside");
+		}
+		return false;
+	}
 
 	public interface OnQRCodeReadListener {
 
@@ -68,6 +80,7 @@ public class QRCodeReaderView extends SurfaceView implements Callback,Camera.Pre
 		public void cameraNotFound();
 		public void QRCodeNotFoundOnCamImage();
 	}
+
 
 	private OnQRCodeReadListener mOnQRCodeReadListener;
 
@@ -119,6 +132,7 @@ public class QRCodeReaderView extends SurfaceView implements Callback,Camera.Pre
 				mOnQRCodeReadListener.cameraNotFound();
 			}
 		}
+		this.setOnTouchListener(this);
 	}
 
 
@@ -172,9 +186,7 @@ public class QRCodeReaderView extends SurfaceView implements Callback,Camera.Pre
 
 			// Notify we found a QRCode
 			if (mOnQRCodeReadListener != null) {
-				if(result.getResultMetadata().get(ResultMetadataType.BYTE_SEGMENTS)!=null){
-					Log.d("bitmap decoding ", "decoded lenght : " + result.getRawBytes().length + ", width :" + ((List) result.getResultMetadata().get(ResultMetadataType.BYTE_SEGMENTS)).size());
-				}
+
 
 				// Transform resultPoints to View coordinates
 				PointF[] transformedPoints = transformToViewCoordinates(result.getResultPoints());
@@ -186,11 +198,6 @@ public class QRCodeReaderView extends SurfaceView implements Callback,Camera.Pre
 				four.x = four.x + 0.1f * (four.x - two.x);
 				four.y = four.y + 0.1f * (four.y - two.y);
 				requestLayout();
-				Log.d("Pointone", one.toString());
-				Log.d("Pointtwo", two.toString());
-				Log.d("Pointthree" , three.toString());
-				Log.d("Pointfour" , four.toString());
-
 				mOnQRCodeReadListener.onQRCodeRead(result.getText(), transformedPoints);
 
 
@@ -301,8 +308,17 @@ public class QRCodeReaderView extends SurfaceView implements Callback,Camera.Pre
 		return transformedPoints;
 		
 	}
-	
-	
+
+	public boolean IsPointInsideRegion(float xp, float yp){
+		Polygon.Builder poly = new Polygon.Builder();
+		poly.addVertex(new Point(one.x,one.y));
+		poly.addVertex(new Point(two.x,two.y));
+		poly.addVertex(new Point(three.x,three.y));
+		poly.addVertex(new Point(four.x,four.y));
+		Polygon polygon = poly.build();
+
+		return polygon.contains(new Point(xp,yp));
+	}
 	/** Check if this device has a camera */
 	private boolean checkCameraHardware(Context context) {
 		if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
