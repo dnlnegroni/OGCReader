@@ -35,7 +35,7 @@ public class DecoderActivity extends Activity implements OnQRCodeReadListener {
 		Camera camera = mydecoderview.getCameraManager().getCamera();
 		super.onStop();
 		if (camera != null) {
-			camera.release();
+			camera.stopPreview();
 		}
 	}
 
@@ -47,7 +47,7 @@ public class DecoderActivity extends Activity implements OnQRCodeReadListener {
 		final PackageManager pm = context.getPackageManager();
 
 		// ?? Ci va veramente ??
-		//camera = Camera.open();
+//		camera = Camera.open();
 
         mydecoderview = (QRCodeReaderView) findViewById(R.id.qrdecoderview);
         mydecoderview.setOnQRCodeReadListener(this);
@@ -94,7 +94,10 @@ public class DecoderActivity extends Activity implements OnQRCodeReadListener {
 	@Override
 	protected void onResume() {
 		super.onResume();
-//		mydecoderview.getCameraManager().startPreview();
+		Camera camera = mydecoderview.getCameraManager().getCamera();
+		if(camera!=null) {
+			mydecoderview.getCameraManager().startPreview();
+		}
 	}
 	
 	@Override

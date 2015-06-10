@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
+import android.view.View;
 import android.widget.ImageView;
 
 import com.google.zxing.BinaryBitmap;
@@ -23,14 +24,17 @@ import com.google.zxing.FormatException;
 import com.google.zxing.NotFoundException;
 import com.google.zxing.PlanarYUVLuminanceSource;
 import com.google.zxing.Result;
+import com.google.zxing.ResultMetadataType;
 import com.google.zxing.ResultPoint;
 import com.google.zxing.client.android.camera.open.CameraManager;
+import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.common.PerspectiveTransform;
 import com.google.zxing.qrcode.QRCodeReader;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 
 /*
  * Copyright 2014 David Lázaro Esparcia.
@@ -79,9 +83,6 @@ public class QRCodeReaderView extends SurfaceView implements Callback,Camera.Pre
 	private PointF three = null;
 	private PointF four = null;
 	private Date lastQrFrame;
-	int SX = 512;
-	int SY = 512;
-	ImageView imageView;
 	Bitmap bitmap;
 	public QRCodeReaderView(Context context) {
 		super(context);
@@ -110,7 +111,8 @@ public class QRCodeReaderView extends SurfaceView implements Callback,Camera.Pre
 
 			mHolder = this.getHolder();
 			mHolder.addCallback(this);
-			mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);  // Need to set this flag despite it's deprecated
+			mHolder.setType(SurfaceHolder.SURFACE_TYPE_HARDWARE);  // Need to set this flag despite it's deprecated
+
 		} else {
 			Log.e(TAG, "Error: Camera not found");
 			if (mOnQRCodeReadListener != null) {
@@ -142,6 +144,9 @@ public class QRCodeReaderView extends SurfaceView implements Callback,Camera.Pre
 			Log.e(TAG, "Exception: " + e.getMessage());
 			mCameraManager.closeDriver();
 		}
+
+//		this.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+
 	}
 
 	@Override
@@ -161,11 +166,16 @@ public class QRCodeReaderView extends SurfaceView implements Callback,Camera.Pre
 
 		HybridBinarizer hybBin = new HybridBinarizer(source);
 		BinaryBitmap bitmap = new BinaryBitmap(hybBin);
-
 		try {
+
 			Result result = mQRCodeReader.decode(bitmap);
+
 			// Notify we found a QRCode
 			if (mOnQRCodeReadListener != null) {
+				if(result.getResultMetadata().get(ResultMetadataType.BYTE_SEGMENTS)!=null){
+					Log.d("bitmap decoding ", "decoded lenght : " + result.getRawBytes().length + ", width :" + ((List) result.getResultMetadata().get(ResultMetadataType.BYTE_SEGMENTS)).size());
+				}
+
 				// Transform resultPoints to View coordinates
 				PointF[] transformedPoints = transformToViewCoordinates(result.getResultPoints());
 				lastQrFrame = new Date();
@@ -173,8 +183,9 @@ public class QRCodeReaderView extends SurfaceView implements Callback,Camera.Pre
 				two = transformedPoints[1];
 				three = transformedPoints[2];
 				four = transformedPoints[3];
+				four.x = four.x + 0.1f * (four.x - two.x);
+				four.y = four.y + 0.1f * (four.y - two.y);
 				requestLayout();
-				invalidate();
 				Log.d("Pointone", one.toString());
 				Log.d("Pointtwo", two.toString());
 				Log.d("Pointthree" , three.toString());
@@ -183,8 +194,6 @@ public class QRCodeReaderView extends SurfaceView implements Callback,Camera.Pre
 				mOnQRCodeReadListener.onQRCodeRead(result.getText(), transformedPoints);
 
 
-			} else {
-
 			}
 
 		} catch (ChecksumException e) {
@@ -192,13 +201,6 @@ public class QRCodeReaderView extends SurfaceView implements Callback,Camera.Pre
 			e.printStackTrace();
 		} catch (NotFoundException e) {
 			// Notify QR not found
-			Date now = new Date();
-			if (lastQrFrame!=null && now.getTime()-lastQrFrame.getTime()>800) {
-				one = null;
-				two = null;
-				three = null;
-				four = null;
-			}
 			if (mOnQRCodeReadListener != null) {
 				mOnQRCodeReadListener.QRCodeNotFoundOnCamImage();
 			}
@@ -208,33 +210,19 @@ public class QRCodeReaderView extends SurfaceView implements Callback,Camera.Pre
 		} finally {
 			mQRCodeReader.reset();
 		}
-	}
-	public PointF corPix(int x0, int y0, int x1, int y1, int x2, int y2, int x3,
-						 int y3, int x, int y) {
-		PointF newPoint =
-		intersectLines(
-				((SY-y)*x0 + (y)*x3)/SY, ((SY-y)*y0 + y*y3)/SY,
-				((SY-y)*x1 + (y)*x2)/SY, ((SY-y)*y1 + y*y2)/SY,
-				((SX-x)*x0 + (x)*x1)/SX, ((SX-x)*y0 + x*y1)/SX,
-				((SX-x)*x3 + (x)*x2)/SX, ((SX-x)*y3 + x*y2)/SX);
-		return newPoint;
-	}
+		if (lastQrFrame!=null){
+			Date now = new Date();
+			if (now.getTime()-lastQrFrame.getTime()>800) {
+				one = null;
+				two = null;
+				three = null;
+				four = null;
+				requestLayout();
+			}
 
-
-	float det(float a, float b, float c, float d) {
-		return a*d-b*c;
+		}
 	}
 
-	public PointF intersectLines( int x1, int y1, int x2, int y2,int x3, int y3, int x4, int y4) {
-		float d = det(x1 - x2, y1 - y2, x3 - x4, y3 - y4);
-
-		if (d==0)
-			d = 1;
-		PointF newPoint = new PointF();
-		newPoint.x = det(det(x1,y1,x2,y2),x1-x2,det(x3,y3,x4,y4),x3-x4)/d;
-		newPoint.y = det(det(x1,y1,x2,y2),y1-y2,det(x3,y3,x4,y4),y3-y4)/d;
-		return newPoint;
-	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {
@@ -249,47 +237,14 @@ public class QRCodeReaderView extends SurfaceView implements Callback,Camera.Pre
 			wallpath.moveTo(one.x, one.y); // used for first point
 			wallpath.lineTo(two.x, two.y);
 			wallpath.lineTo(three.x, three.y);
-			four.x = four.x + 0.1f * (four.x - two.x);
-			four.y = four.y + 0.1f * (four.y - two.y);
+
 			wallpath.lineTo(four.x,four.y);
 			wallpath.lineTo(one.x, one.y); // there is a setLastPoint action but i found it not to work as expected
 			canvas.drawPath(wallpath, wallpaint);
-//			RenderedOp dest;
-			Date startime = new Date();
-			Log.d("PerspectiveDrawing","start drawing at:" + startime.toString());
-			PerspectiveTransform trans = PerspectiveTransform.quadrilateralToQuadrilateral(0,SY,0,0,SX,0,SX,SY,one.x,one.y,two.x,two.y,three.x,three.y,four.x,four.y);
-			float[] points = new float[2*SX*SY];
-			for(int i = 0; i < points.length ; i+=2){
-				points[i] = (float)Math.floor(i/2)%SY;//x
-				points[i+1] = (float)Math.floor(Math.floor(i/2)/SY);//y
-			}
-			trans.transformPoints(points);
-			for(int i = 0; i < points.length ; i+=2){
-				int imagex =(int)Math.floor(i/2)%SY;//x
-				int imagey = (int)Math.floor(Math.floor(i/2)/SY);//y
-				float screenx = points[i];
-				float screeny = points[i+1];
-				int colorofpixel = bitmap.getPixel(imagex, imagey);
-				p.setColor(colorofpixel);
-				canvas.drawPoint(screenx,screeny,p);
-			}
-			Log.d("PerspectiveDrawing","finished drawing after :" +((new Date()).getTime()-startime.getTime()) + " ms");
-//			for (int x=0;x<SX;x++) {
-//				for (int y=0;y<SY;y++) {
-//					int pixel = bitmap.getPixel(x, y);
-//					int redValue = Color.red(pixel);
-//					int blueValue = Color.blue(pixel);
-//					int greenValue = Color.green(pixel);
-//					PointF newPoint = corPix((int)two.x, (int)two.y, (int)three.x, (int)three.y, (int)four.x, (int)four.y, (int)one.x, (int)one.y, x, y);
-//					p.setColor(pixel);
-//
-//					canvas.drawPoint(newPoint.x,newPoint.y,p);
-//				}
-//			}
 
-
-
-//			invalidate();
+			//Queste due righe disegnano la bitmap partendo dai quattro vertici
+			float[] po = {two.x,two.y,three.x,three.y,one.x,one.y,four.x,four.y};
+			canvas.drawBitmapMesh(bitmap, 1, 1, po, 0,null, 0, null);
 		}
 	}
 
