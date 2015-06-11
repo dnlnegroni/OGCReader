@@ -8,10 +8,13 @@ import android.view.MenuItem;
 
 public class FreeDraw extends Activity {
 
+    private DrawingView drawingView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_free_draw);
+        drawingView = (DrawingView) findViewById(R.id.drawing);
     }
 
     @Override

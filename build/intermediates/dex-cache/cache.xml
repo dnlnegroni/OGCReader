@@ -9,6 +9,20 @@
         <dex dex="/Users/daniele/Desktop/QRCodeReaderView-master 2/QR-ReaderExample/qRReaderExample/build/intermediates/pre-dexed/debug/core-ac7eae676197204598559970831efbca10d74bde.jar" />
     </item>
     <item
+        jar="/Users/daniele/.gradle/caches/modules-2/files-2.1/com.parse.bolts/bolts-android/1.2.0/6ee2953ccf51ce72b6d548c30c4633b99eb4f9dd/bolts-android-1.2.0.jar"
+        jumboMode="false"
+        revision="21.1.2"
+        sha1="6ee2953ccf51ce72b6d548c30c4633b99eb4f9dd">
+        <dex dex="/Users/daniele/Desktop/QRCodeReaderView-master 2/QR-ReaderExample/qRReaderExample/build/intermediates/pre-dexed/debug/bolts-android-1.2.0-a84d0d8e4d990d4e990ccacfbdef5a83de34b39e.jar" />
+    </item>
+    <item
+        jar="/Users/daniele/Desktop/QRCodeReaderView-master 2/QR-ReaderExample/qRReaderExample/libs/Parse-1.9.2.jar"
+        jumboMode="false"
+        revision="21.1.2"
+        sha1="fe739334780fe321141e62720822c2d456061899">
+        <dex dex="/Users/daniele/Desktop/QRCodeReaderView-master 2/QR-ReaderExample/qRReaderExample/build/intermediates/pre-dexed/debug/Parse-1.9.2-c6b67cf649c6b5da73da606beed618ef66cc4555.jar" />
+    </item>
+    <item
         jar="/Users/daniele/Desktop/QRCodeReaderView-master 2/QR-ReaderExample/qRReaderExample/build/intermediates/exploded-aar/com.dlazaro66.qrcodereaderview/qrcodereaderview/1.0.0/classes.jar"
         jumboMode="false"
         revision="21.1.2"
