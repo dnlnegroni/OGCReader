@@ -23,6 +23,7 @@ import android.widget.ImageView;
 
 import com.example.qr_readerexample.com.example.qr_readerexample.interseption.Point;
 import com.example.qr_readerexample.com.example.qr_readerexample.interseption.Polygon;
+import com.example.qr_readerexample.com.example.qr_readerexample.model.QREntity;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.ChecksumException;
 import com.google.zxing.FormatException;
@@ -92,7 +93,8 @@ public class QRCodeReaderView extends SurfaceView implements View.OnTouchListene
 	private PointF four = null;
 	private Date lastQrFrame;
 	private int version = -1;
-	Bitmap bitmap;
+//	Bitmap bitmap;
+	QREntity qrEntity;
 	public QRCodeReaderView(Context context) {
 		super(context);
 		init();
@@ -103,8 +105,8 @@ public class QRCodeReaderView extends SurfaceView implements View.OnTouchListene
 		super(context, attrs);
 		init();
 	}
-	public void setBitmap(Bitmap bitmap){
-		this.bitmap = bitmap;
+	public void setQREntity(QREntity qrEntity){
+		this.qrEntity = qrEntity;
 	}
 	public void setOnQRCodeReadListener(OnQRCodeReadListener onQRCodeReadListener) {
 		mOnQRCodeReadListener = onQRCodeReadListener;
@@ -383,8 +385,15 @@ public class QRCodeReaderView extends SurfaceView implements View.OnTouchListene
 
 			//Queste due righe disegnano la bitmap partendo dai quattro vertici
 			float[] po = {two.x,two.y,three.x,three.y,one.x,one.y,four.x,four.y};
-			if(bitmap!= null){
-				canvas.drawBitmapMesh(bitmap, 1, 1, po, 0,null, 0, null);
+			if( qrEntity != null){
+				try{
+					Bitmap bitmap = qrEntity.getRepresentation();
+					canvas.drawBitmapMesh(bitmap, 1, 1, po, 0, null, 0, null);
+				}catch (com.parse.ParseException e){
+
+				}
+			}else{
+
 			}
 		}
 	}
@@ -405,7 +414,7 @@ public class QRCodeReaderView extends SurfaceView implements View.OnTouchListene
 		mPreviewWidth = mCameraManager.getPreviewSize().x;
 		mPreviewHeight = mCameraManager.getPreviewSize().y;
 
-		
+
 		mCameraManager.stopPreview();
 		mCameraManager.getCamera().setPreviewCallback(this);
 		mCameraManager.getCamera().setDisplayOrientation(90); // Portrait mode

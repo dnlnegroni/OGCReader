@@ -99,44 +99,47 @@ public class DecoderActivity extends Activity implements OnQRCodeReadListener {
     // Called when a QR is decoded
     // "text" : the text encoded in QR
     // "points" : points where QR control points are placed
+	private String lastQRURL;
 	@Override
 	public void onQRCodeRead(String text, PointF[] points) {
 		mydecoderview.invalidate();
-		ParseQuery<QREntity> query = ParseQuery.getQuery(QREntity.class);
-		query.whereEqualTo("QRURL", text);
-		final String stext = text;
-		query.findInBackground(new FindCallback<QREntity>() {
-			@Override
-			public void done(List<QREntity> results, ParseException e) {
-				if (e == null) {
-					if (results.size() > 0) {
-						for (QREntity qr : results) {
-							try {
-								Bitmap bitmap = qr.getRepresentation();
-								mydecoderview.setBitmap(bitmap);
-							} catch (com.parse.ParseException imagex) {
-								Log.d("error QR", "error :" + imagex.getMessage());
-								mydecoderview.setBitmap(null);
+		if(lastQRURL == null || !lastQRURL.equals(text)) {
+			lastQRURL = text;
+			ParseQuery<QREntity> query = ParseQuery.getQuery(QREntity.class);
+			query.whereEqualTo("QRURL", text);
+			final String stext = text;
+			query.findInBackground(new FindCallback<QREntity>() {
+				@Override
+				public void done(List<QREntity> results, ParseException e) {
+					if (e == null) {
+						if (results.size() > 0) {
+							for (QREntity qr : results) {
+								try {
+									Bitmap bitmap = qr.getRepresentation();
+									mydecoderview.setQREntity(qr);
+								} catch (com.parse.ParseException imagex) {
+									Log.d("error QR", "error :" + imagex.getMessage());
+									mydecoderview.setQREntity(null);
+								}
 							}
+						} else {
+							QREntity entity = new QREntity();
+							entity.setQRURL(stext);
+							Bitmap bitmap = Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888);
+
+							Canvas canvas = new Canvas(bitmap);
+							canvas.drawColor(Color.argb(255, 255, 255, 255));
+							entity.setRepresentation(bitmap);
+							mydecoderview.setQREntity(entity);
+							Log.d("new QR", " new string associated :" + stext);
 						}
 					} else {
-						QREntity entity = new QREntity();
-						entity.setQRURL(stext);
-						Bitmap bitmap = Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888);
-
-						Canvas canvas = new Canvas(bitmap);
-						canvas.drawColor(Color.argb(255, 255, 255, 255));
-						entity.setRepresentation(bitmap);
-						mydecoderview.setBitmap(bitmap);
-						Log.d("new QR", " new string associated :" + stext);
+						Log.d("error QR", "error :" + e.getMessage());
+						mydecoderview.setQREntity(null);
 					}
-				} else {
-					Log.d("error QR", "error :" + e.getMessage());
-					mydecoderview.setBitmap(null);
 				}
-			}
-		});
-
+			});
+		}
 
 	}
 
