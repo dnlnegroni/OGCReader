@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -37,6 +38,9 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.common.PerspectiveTransform;
 import com.google.zxing.qrcode.QRCodeReader;
+import com.parse.GetDataCallback;
+import com.parse.ParseException;
+import com.parse.ParseFile;
 
 import java.io.IOException;
 import java.util.Date;
@@ -93,8 +97,9 @@ public class QRCodeReaderView extends SurfaceView implements View.OnTouchListene
 	private PointF four = null;
 	private Date lastQrFrame;
 	private int version = -1;
-//	Bitmap bitmap;
+	Bitmap bitmap = null;
 	QREntity qrEntity;
+
 	public QRCodeReaderView(Context context) {
 		super(context);
 		init();
@@ -292,48 +297,49 @@ public class QRCodeReaderView extends SurfaceView implements View.OnTouchListene
 				// Transform resultPoints to View coordinates
 				PointF[] transformedPoints = transformToViewCoordinates(result.getResultPoints());
 				lastQrFrame = new Date();
-				one = transformedPoints[0];
-				two = transformedPoints[1];
-				three = transformedPoints[2];
-				four = transformedPoints[3];
-				if(version== -1){
-					four.x = four.x + 0.1f * (four.x - two.x);
-					four.y = four.y + 0.1f * (four.y - two.y);
-				}else if(version == 1){
-					four.x = four.x + 0.2f * (four.x - two.x);
-					four.y = four.y + 0.2f * (four.y - two.y);
-				}else if(version == 2){
-					four.x = four.x + 0.1f * (four.x - two.x);
-					four.y = four.y + 0.1f * (four.y - two.y);
-				}else if(version == 3){
-					four.x = four.x + 0.1f * (four.x - two.x);
-					four.y = four.y + 0.1f * (four.y - two.y);
-				}else if(version == 4){
-					four.x = four.x + 0.1f * (four.x - two.x);
-					four.y = four.y + 0.1f * (four.y - two.y);
-				}else if(version == 5){
-					four.x = four.x + 0.05f * (four.x - two.x);
-					four.y = four.y + 0.05f * (four.y - two.y);
-				}else if(version == 6){
-					four.x = four.x + 0.05f * (four.x - two.x);
-					four.y = four.y + 0.05f * (four.y - two.y);
-				}else if(version == 7){
-					four.x = four.x + 0.05f * (four.x - two.x);
-					four.y = four.y + 0.05f * (four.y - two.y);
-				}else if(version == 8){
-					four.x = four.x + 0.05f * (four.x - two.x);
-					four.y = four.y + 0.05f * (four.y - two.y);
-				}else if(version == 9){
-					four.x = four.x + 0.05f * (four.x - two.x);
-					four.y = four.y + 0.05f * (four.y - two.y);
-				}else if(version == 10){
-					four.x = four.x + 0.05f * (four.x - two.x);
-					four.y = four.y + 0.05f * (four.y - two.y);
+				if(transformedPoints.length==4) {
+					one = transformedPoints[0];
+					two = transformedPoints[1];
+					three = transformedPoints[2];
+					four = transformedPoints[3];
+					if (version == -1) {
+						four.x = four.x + 0.1f * (four.x - two.x);
+						four.y = four.y + 0.1f * (four.y - two.y);
+					} else if (version == 1) {
+						four.x = four.x + 0.2f * (four.x - two.x);
+						four.y = four.y + 0.2f * (four.y - two.y);
+					} else if (version == 2) {
+						four.x = four.x + 0.1f * (four.x - two.x);
+						four.y = four.y + 0.1f * (four.y - two.y);
+					} else if (version == 3) {
+						four.x = four.x + 0.1f * (four.x - two.x);
+						four.y = four.y + 0.1f * (four.y - two.y);
+					} else if (version == 4) {
+						four.x = four.x + 0.1f * (four.x - two.x);
+						four.y = four.y + 0.1f * (four.y - two.y);
+					} else if (version == 5) {
+						four.x = four.x + 0.05f * (four.x - two.x);
+						four.y = four.y + 0.05f * (four.y - two.y);
+					} else if (version == 6) {
+						four.x = four.x + 0.05f * (four.x - two.x);
+						four.y = four.y + 0.05f * (four.y - two.y);
+					} else if (version == 7) {
+						four.x = four.x + 0.05f * (four.x - two.x);
+						four.y = four.y + 0.05f * (four.y - two.y);
+					} else if (version == 8) {
+						four.x = four.x + 0.05f * (four.x - two.x);
+						four.y = four.y + 0.05f * (four.y - two.y);
+					} else if (version == 9) {
+						four.x = four.x + 0.05f * (four.x - two.x);
+						four.y = four.y + 0.05f * (four.y - two.y);
+					} else if (version == 10) {
+						four.x = four.x + 0.05f * (four.x - two.x);
+						four.y = four.y + 0.05f * (four.y - two.y);
+					}
+
+					requestLayout();
+					mOnQRCodeReadListener.onQRCodeRead(result.getText(), transformedPoints);
 				}
-
-				requestLayout();
-				mOnQRCodeReadListener.onQRCodeRead(result.getText(), transformedPoints);
-
 
 			}
 
@@ -382,22 +388,29 @@ public class QRCodeReaderView extends SurfaceView implements View.OnTouchListene
 			wallpath.lineTo(four.x,four.y);
 			wallpath.lineTo(one.x, one.y); // there is a setLastPoint action but i found it not to work as expected
 			canvas.drawPath(wallpath, wallpaint);
-
-			//Queste due righe disegnano la bitmap partendo dai quattro vertici
-			float[] po = {two.x,two.y,three.x,three.y,one.x,one.y,four.x,four.y};
-			if( qrEntity != null){
-				try{
-					Bitmap bitmap = qrEntity.getRepresentation();
+			if(qrEntity != null){
+				if (bitmap != null) {
+					//Queste due righe disegnano la bitmap partendo dai quattro vertici
+					float[] po = {two.x, two.y, three.x, three.y, one.x, one.y, four.x, four.y};
 					canvas.drawBitmapMesh(bitmap, 1, 1, po, 0, null, 0, null);
-				}catch (com.parse.ParseException e){
+				}else{
+						ParseFile file =  qrEntity.getRepresentation();
+						file.getDataInBackground(new GetDataCallback() {
+							@Override
+							public void done(byte[] bytes, ParseException e) {
+								if(e==null){
+									bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+									requestLayout();
+								}else{
+									Log.d("ParseException","Parse error while loading image : " + e.getMessage());
+								}
+							}
+						});
 
 				}
-			}else{
-
 			}
 		}
 	}
-
 
 	@Override
 	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
@@ -454,8 +467,8 @@ public class QRCodeReaderView extends SurfaceView implements View.OnTouchListene
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		Log.d("Touched" , "x" + event.getX()+"y" + event.getX());
-		if(one != null && two != null  && three != null  && four != null && IsPointInsideRegion(event.getX(),event.getY())){
-			Log.d("Toouched", "inside");
+		if(one != null && two != null  && three != null  && four != null && IsPointInsideRegion(event.getX(),event.getY()) && qrEntity != null){
+			Log.d("Toouched", "inside" + qrEntity.getQRURL());
 
 			if(qrEntity!=null){
 				Intent intent = new Intent(this.getContext(), FreeDraw.class);

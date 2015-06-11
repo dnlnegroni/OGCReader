@@ -114,13 +114,8 @@ public class DecoderActivity extends Activity implements OnQRCodeReadListener {
 					if (e == null) {
 						if (results.size() > 0) {
 							for (QREntity qr : results) {
-								try {
-									Bitmap bitmap = qr.getRepresentation();
-									mydecoderview.setQREntity(qr);
-								} catch (com.parse.ParseException imagex) {
-									Log.d("error QR", "error :" + imagex.getMessage());
-									mydecoderview.setQREntity(null);
-								}
+								mydecoderview.setQREntity(qr);
+								Log.d("old QR", " QR id associated :" + qr.getObjectId());
 							}
 						} else {
 							QREntity entity = new QREntity();

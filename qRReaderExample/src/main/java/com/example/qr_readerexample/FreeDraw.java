@@ -1,27 +1,96 @@
 package com.example.qr_readerexample;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+
+import com.example.qr_readerexample.com.example.qr_readerexample.model.QREntity;
+import com.parse.FindCallback;
+import com.parse.GetDataCallback;
+import com.parse.ParseException;
+import com.parse.ParseFile;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+
+import java.util.List;
 
 
 public class FreeDraw extends Activity {
 
     private DrawingView drawView;
     private ImageButton currPaint;
-
+    private String qrurl;
+    private  QREntity qrEntity;
+    private ImageButton saveButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_free_draw);
+
         drawView = (DrawingView) findViewById(R.id.drawing);
         LinearLayout paintLayout = (LinearLayout)findViewById(R.id.paint_colors);
         currPaint = (ImageButton)paintLayout.getChildAt(0);
         currPaint.setImageDrawable(getResources().getDrawable(R.drawable.paint_pressed));
+        saveButton = (ImageButton) findViewById(R.id.save_btn);
+        Intent intent = getIntent();
+        qrurl =  intent.getStringExtra("QRURL");
+
+        if( qrurl!= null){
+            ParseQuery<QREntity> query = ParseQuery.getQuery(QREntity.class);
+            query.whereEqualTo("QRURL", qrurl);
+            final String stext = qrurl;
+            query.findInBackground(new FindCallback<QREntity>() {
+                @Override
+                public void done(List<QREntity> results, ParseException e) {
+                    if (e == null) {
+                        if (results.size() > 0) {
+                            qrEntity = results.get(0) ;
+                            ParseFile file =  qrEntity.getRepresentation();
+                            file.getDataInBackground(new GetDataCallback() {
+                                @Override
+                                public void done(byte[] bytes, ParseException e) {
+                                    if(e==null){
+
+                                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                                        drawView.setup(bitmap,qrEntity);
+                                        drawView.requestLayout();
+                                    }else{
+                                        Log.d("ParseException","Parse error while loading image : " + e.getMessage());
+                                    }
+                                }
+                            });
+                        } else {
+                            Log.d("error QR", "error : non existing QR");
+                            qrEntity = null;
+                        }
+                    } else {
+                        Log.d("error QR", "error :" + e.getMessage());
+                        qrEntity = null;
+                    }
+                }
+            });
+        }
+        saveButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                Log.d("Save image","save button clicked");
+                drawView.saveBitmap();
+                return false;
+            }
+        });
+
     }
 
     public void paintClicked(View view){

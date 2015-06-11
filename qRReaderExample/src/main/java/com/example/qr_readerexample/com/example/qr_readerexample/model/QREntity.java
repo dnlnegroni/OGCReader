@@ -36,10 +36,13 @@ public class QREntity extends ParseObject {
             this.put("ImageFile", file);
             this.saveInBackground();
         }
-        public  Bitmap getRepresentation() throws com.parse.ParseException{
+        public  ParseFile getRepresentation(){
+
             ParseFile file =  this.getParseFile("ImageFile");
-            byte[] image = file.getData();
-            Bitmap bitmap = BitmapFactory .decodeByteArray(image, 0, image.length);
-            return bitmap;
+
+//            byte[] image = file.getData();
+//            Bitmap bitmap = BitmapFactory .decodeByteArray(image, 0, image.length);
+
+            return file;
         }
 }
