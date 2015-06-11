@@ -101,10 +101,11 @@ public class QRCodeReaderView extends SurfaceView implements View.OnTouchListene
 
 	public QRCodeReaderView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		bitmap = ((BitmapDrawable)getResources().getDrawable(R.drawable.android)).getBitmap();
 		init();
 	}
-
+	public void setBitmap(Bitmap bitmap){
+		this.bitmap = bitmap;
+	}
 	public void setOnQRCodeReadListener(OnQRCodeReadListener onQRCodeReadListener) {
 		mOnQRCodeReadListener = onQRCodeReadListener;
 	}
