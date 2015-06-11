@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.PointF;
 import android.graphics.drawable.BitmapDrawable;
 import android.hardware.Camera;
@@ -20,10 +21,15 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.example.qr_readerexample.QRCodeReaderView.OnQRCodeReadListener;
+import com.example.qr_readerexample.com.example.qr_readerexample.model.QREntity;
+import com.parse.FindCallback;
+import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 
 import java.io.ByteArrayOutputStream;
+import java.util.List;
 
 import static com.example.qr_readerexample.R.drawable.android;
 
@@ -55,16 +61,16 @@ public class DecoderActivity extends Activity implements OnQRCodeReadListener {
         setContentView(R.layout.activity_decoder);
 		//parse tests
 
-		Bitmap bitmap = BitmapFactory.decodeResource(getResources(),
-				android);
-		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-		byte[] image = stream.toByteArray();
-		ParseFile file = new ParseFile("android.png", image);
-		ParseObject testObject = new ParseObject("TestUploadFoto");
-		testObject.put("ImageName", "Android Logo");
-		testObject.put("ImageFile", file);
-		testObject.saveInBackground();
+//		Bitmap bitmap = BitmapFactory.decodeResource(getResources(),
+//				android);
+//		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+//		bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+//		byte[] image = stream.toByteArray();
+//		ParseFile file = new ParseFile("android.png", image);
+//		ParseObject testObject = new ParseObject("TestUploadFoto");
+//		testObject.put("ImageName", "Android Logo");
+//		testObject.put("ImageFile", file);
+//		testObject.saveInBackground();
 		//end of parse tests
 
 		button = (ToggleButton) findViewById(R.id.togglebutton);
@@ -96,6 +102,42 @@ public class DecoderActivity extends Activity implements OnQRCodeReadListener {
 	@Override
 	public void onQRCodeRead(String text, PointF[] points) {
 		mydecoderview.invalidate();
+		ParseQuery<QREntity> query = ParseQuery.getQuery(QREntity.class);
+		query.whereEqualTo("QRURL", text);
+		final String stext = text;
+		query.findInBackground(new FindCallback<QREntity>() {
+			@Override
+			public void done(List<QREntity> results, ParseException e) {
+				if (e != null) {
+					if (results.size() > 0) {
+						for (QREntity qr : results) {
+							try {
+								Bitmap bitmap = qr.getRepresentation();
+								mydecoderview.setBitmap(bitmap);
+							} catch (com.parse.ParseException imagex) {
+								Log.d("error QR", "error :" + imagex.getMessage());
+								mydecoderview.setBitmap(null);
+							}
+						}
+					} else {
+						QREntity entity = new QREntity();
+						entity.setQRURL(stext);
+						Bitmap bitmap = Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888);
+
+						Canvas canvas = new Canvas(bitmap);
+						canvas.drawColor(Color.argb(255, 255, 255, 255));
+						entity.setRepresentation(bitmap);
+						mydecoderview.setBitmap(bitmap);
+						Log.d("new QR", " new string associated :" + stext);
+					}
+				} else {
+					Log.d("error QR", "error :" + e.getMessage());
+					mydecoderview.setBitmap(null);
+				}
+			}
+		});
+
+
 	}
 
 	

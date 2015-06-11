@@ -383,7 +383,9 @@ public class QRCodeReaderView extends SurfaceView implements View.OnTouchListene
 
 			//Queste due righe disegnano la bitmap partendo dai quattro vertici
 			float[] po = {two.x,two.y,three.x,three.y,one.x,one.y,four.x,four.y};
-			canvas.drawBitmapMesh(bitmap, 1, 1, po, 0,null, 0, null);
+			if(bitmap!= null){
+				canvas.drawBitmapMesh(bitmap, 1, 1, po, 0,null, 0, null);
+			}
 		}
 	}
 
