@@ -1,5 +1,6 @@
 package com.example.qr_readerexample;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -442,9 +443,10 @@ public class QRCodeReaderView extends SurfaceView implements View.OnTouchListene
 	public boolean onTouch(View v, MotionEvent event) {
 		Log.d("Touched" , "x" + event.getX()+"y" + event.getX());
 		if(one != null && two != null  && three != null  && four != null && IsPointInsideRegion(event.getX(),event.getY())){
-			Log.d("Toouched","inside");
+			Log.d("Toouched", "inside");
 			Intent intent = new Intent(this.getContext(), FreeDraw.class);
 			this.getContext().startActivity(intent);
+			((Activity) this.getContext()).overridePendingTransition(R.anim.zoom_in, R.anim.zoom_exit);
 		}
 		return false;
 	}
