@@ -108,7 +108,7 @@ public class DecoderActivity extends Activity implements OnQRCodeReadListener {
 		query.findInBackground(new FindCallback<QREntity>() {
 			@Override
 			public void done(List<QREntity> results, ParseException e) {
-				if (e != null) {
+				if (e == null) {
 					if (results.size() > 0) {
 						for (QREntity qr : results) {
 							try {
