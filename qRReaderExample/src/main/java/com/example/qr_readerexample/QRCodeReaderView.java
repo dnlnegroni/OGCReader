@@ -456,9 +456,14 @@ public class QRCodeReaderView extends SurfaceView implements View.OnTouchListene
 		Log.d("Touched" , "x" + event.getX()+"y" + event.getX());
 		if(one != null && two != null  && three != null  && four != null && IsPointInsideRegion(event.getX(),event.getY())){
 			Log.d("Toouched", "inside");
-			Intent intent = new Intent(this.getContext(), FreeDraw.class);
-			this.getContext().startActivity(intent);
-			((Activity) this.getContext()).overridePendingTransition(R.anim.zoom_in, R.anim.zoom_exit);
+
+			if(qrEntity!=null){
+				Intent intent = new Intent(this.getContext(), FreeDraw.class);
+				intent.putExtra("QRURL",qrEntity.getQRURL());
+				this.getContext().startActivity(intent);
+				((Activity) this.getContext()).overridePendingTransition(R.anim.zoom_in, R.anim.zoom_exit);
+			}
+
 		}
 		return false;
 	}
