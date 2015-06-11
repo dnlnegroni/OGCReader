@@ -32,7 +32,7 @@ public class QREntity extends ParseObject {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
             byte[] image = stream.toByteArray();
-            ParseFile file = new ParseFile("android.png", image);
+            ParseFile file = new ParseFile("QRepresentation.png", image);
             this.put("ImageFile", file);
             this.saveInBackground();
         }
