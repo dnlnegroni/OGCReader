@@ -1,1 +1,1 @@
-include ':qRReaderExample'
+include ':qRReaderExample', ':Parse-1.9.2'

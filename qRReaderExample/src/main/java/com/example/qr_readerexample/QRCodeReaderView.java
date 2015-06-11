@@ -461,7 +461,7 @@ public class QRCodeReaderView extends SurfaceView implements View.OnTouchListene
 				Intent intent = new Intent(this.getContext(), FreeDraw.class);
 				intent.putExtra("QRURL",qrEntity.getQRURL());
 				this.getContext().startActivity(intent);
-				((Activity) this.getContext()).overridePendingTransition(R.anim.zoom_in, R.anim.zoom_exit);
+				((Activity) this.getContext()).overridePendingTransition(R.anim.zoom_exit, R.anim.zoom_in);
 			}
 
 		}
