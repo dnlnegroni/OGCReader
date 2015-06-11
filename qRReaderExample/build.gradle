@@ -19,5 +19,7 @@ android {
 }
 
 dependencies {
+    compile 'com.parse.bolts:bolts-android:1.+'
+    compile fileTree(dir: 'libs', include: 'Parse-1.9.2.jar')
     compile 'com.dlazaro66.qrcodereaderview:qrcodereaderview:1.0.0'
 }

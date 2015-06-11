@@ -3,8 +3,11 @@ package com.example.qr_readerexample;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.PointF;
+import android.graphics.drawable.BitmapDrawable;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,6 +20,12 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.example.qr_readerexample.QRCodeReaderView.OnQRCodeReadListener;
+import com.parse.ParseFile;
+import com.parse.ParseObject;
+
+import java.io.ByteArrayOutputStream;
+
+import static com.example.qr_readerexample.R.drawable.android;
 
 
 public class DecoderActivity extends Activity implements OnQRCodeReadListener {
@@ -42,13 +51,24 @@ public class DecoderActivity extends Activity implements OnQRCodeReadListener {
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_decoder);
+		//parse tests
+
+		Bitmap bitmap = BitmapFactory.decodeResource(getResources(),
+				android);
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+		byte[] image = stream.toByteArray();
+		ParseFile file = new ParseFile("android.png", image);
+		ParseObject testObject = new ParseObject("TestUploadFoto");
+		testObject.put("ImageName", "Android Logo");
+		testObject.put("ImageFile", file);
+		testObject.saveInBackground();
+		//end of parse tests
+
 		button = (ToggleButton) findViewById(R.id.togglebutton);
 		final PackageManager pm = context.getPackageManager();
-
-		// ?? Ci va veramente ??
-//		camera = Camera.open();
-
         mydecoderview = (QRCodeReaderView) findViewById(R.id.qrdecoderview);
         mydecoderview.setOnQRCodeReadListener(this);
         mydecoderview.setWillNotDraw(false);
