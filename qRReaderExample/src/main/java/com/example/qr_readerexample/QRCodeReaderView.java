@@ -65,14 +65,7 @@ import java.util.List;
  */
 public class QRCodeReaderView extends SurfaceView implements View.OnTouchListener,Callback,Camera.PreviewCallback {
 
-	@Override
-	public boolean onTouch(View v, MotionEvent event) {
-		Log.d("Touched" , "x" + event.getX()+"y" + event.getX());
-		if(one != null && two != null  && three != null  && four != null && IsPointInsideRegion(event.getX(),event.getY())){
-			Log.d("Toouched","inside");
-		}
-		return false;
-	}
+
 
 	public interface OnQRCodeReadListener {
 
@@ -96,6 +89,7 @@ public class QRCodeReaderView extends SurfaceView implements View.OnTouchListene
 	private PointF three = null;
 	private PointF four = null;
 	private Date lastQrFrame;
+	private int version = -1;
 	Bitmap bitmap;
 	public QRCodeReaderView(Context context) {
 		super(context);
@@ -124,7 +118,7 @@ public class QRCodeReaderView extends SurfaceView implements View.OnTouchListene
 
 			mHolder = this.getHolder();
 			mHolder.addCallback(this);
-			mHolder.setType(SurfaceHolder.SURFACE_TYPE_HARDWARE);  // Need to set this flag despite it's deprecated
+			mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);  // Need to set this flag despite it's deprecated
 
 		} else {
 			Log.e(TAG, "Error: Camera not found");
@@ -184,6 +178,108 @@ public class QRCodeReaderView extends SurfaceView implements View.OnTouchListene
 
 			Result result = mQRCodeReader.decode(bitmap);
 
+			if(result.getResultMetadata().get(ResultMetadataType.ERROR_CORRECTION_LEVEL)!=null){
+				if(result.getResultMetadata().get(ResultMetadataType.ERROR_CORRECTION_LEVEL).toString().equals("L")){
+					if(result.getRawBytes().length > 0 && result.getRawBytes().length < 41){
+						version = 1;
+					}else if(result.getRawBytes().length > 41 && result.getRawBytes().length < 77){
+						version = 2;
+					}else if(result.getRawBytes().length > 77 && result.getRawBytes().length < 127){
+						version = 3;
+					}else if(result.getRawBytes().length > 127 && result.getRawBytes().length < 187){
+						version = 4;
+					}else if(result.getRawBytes().length > 187 && result.getRawBytes().length < 255){
+						version = 5;
+					}else if(result.getRawBytes().length > 255 && result.getRawBytes().length < 322){
+						version = 6;
+					}else if(result.getRawBytes().length > 322 && result.getRawBytes().length < 370){
+						version = 7;
+					}else if(result.getRawBytes().length > 370 && result.getRawBytes().length < 461){
+						version = 8;
+					}else if(result.getRawBytes().length > 461 && result.getRawBytes().length < 552){
+						version = 9;
+					}else if(result.getRawBytes().length > 552 && result.getRawBytes().length < 652){
+						version = 10;
+					}else{
+						version =-1;
+					}
+				}else if(result.getResultMetadata().get(ResultMetadataType.ERROR_CORRECTION_LEVEL).toString().equals("M")){
+					if(result.getRawBytes().length > 0 && result.getRawBytes().length < 34){
+						version = 1;
+					}else if(result.getRawBytes().length > 34 && result.getRawBytes().length < 63){
+						version = 2;
+					}else if(result.getRawBytes().length > 63 && result.getRawBytes().length < 101){
+						version = 3;
+					}else if(result.getRawBytes().length > 101 && result.getRawBytes().length < 149){
+						version = 4;
+					}else if(result.getRawBytes().length > 149 && result.getRawBytes().length < 202){
+						version = 5;
+					}else if(result.getRawBytes().length > 202 && result.getRawBytes().length < 255){
+						version = 6;
+					}else if(result.getRawBytes().length > 255 && result.getRawBytes().length < 293){
+						version = 7;
+					}else if(result.getRawBytes().length > 293 && result.getRawBytes().length < 365){
+						version = 8;
+					}else if(result.getRawBytes().length > 365 && result.getRawBytes().length < 432){
+						version = 9;
+					}else if(result.getRawBytes().length > 432 && result.getRawBytes().length < 552){
+						version = 10;
+					}else{
+						version =-1;
+					}
+				}else if(result.getResultMetadata().get(ResultMetadataType.ERROR_CORRECTION_LEVEL).toString().equals("Q")){
+					if(result.getRawBytes().length > 0 && result.getRawBytes().length < 27){
+						version = 1;
+					}else if(result.getRawBytes().length > 27 && result.getRawBytes().length < 48){
+						version = 2;
+					}else if(result.getRawBytes().length > 48 && result.getRawBytes().length < 77){
+						version = 3;
+					}else if(result.getRawBytes().length > 77 && result.getRawBytes().length < 111){
+						version = 4;
+					}else if(result.getRawBytes().length > 111 && result.getRawBytes().length < 144){
+						version = 5;
+					}else if(result.getRawBytes().length > 144 && result.getRawBytes().length < 178){
+						version = 6;
+					}else if(result.getRawBytes().length > 178 && result.getRawBytes().length < 207){
+						version = 7;
+					}else if(result.getRawBytes().length > 207 && result.getRawBytes().length < 259){
+						version = 8;
+					}else if(result.getRawBytes().length > 259 && result.getRawBytes().length < 312){
+						version = 9;
+					}else if(result.getRawBytes().length > 312 && result.getRawBytes().length < 364){
+						version = 10;
+					}else{
+						version =-1;
+					}
+				}else if(result.getResultMetadata().get(ResultMetadataType.ERROR_CORRECTION_LEVEL).toString().equals("H")){
+					if(result.getRawBytes().length > 0 && result.getRawBytes().length < 17){
+						version = 1;
+					}else if(result.getRawBytes().length > 27 && result.getRawBytes().length < 34){
+						version = 2;
+					}else if(result.getRawBytes().length > 43 && result.getRawBytes().length < 58){
+						version = 3;
+					}else if(result.getRawBytes().length > 58 && result.getRawBytes().length < 82){
+						version = 4;
+					}else if(result.getRawBytes().length > 82 && result.getRawBytes().length < 106){
+						version = 5;
+					}else if(result.getRawBytes().length > 106 && result.getRawBytes().length < 139){
+						version = 6;
+					}else if(result.getRawBytes().length > 139 && result.getRawBytes().length < 154){
+						version = 7;
+					}else if(result.getRawBytes().length > 154 && result.getRawBytes().length < 202){
+						version = 8;
+					}else if(result.getRawBytes().length > 202 && result.getRawBytes().length < 235){
+						version = 9;
+					}else if(result.getRawBytes().length > 235 && result.getRawBytes().length < 288){
+						version = 10;
+					}else{
+						version =-1;
+					}
+				}else{
+					version =-1;
+				}
+				Log.d("qr code size", "version of QR: " + version);
+			}
 			// Notify we found a QRCode
 			if (mOnQRCodeReadListener != null) {
 
@@ -195,8 +291,41 @@ public class QRCodeReaderView extends SurfaceView implements View.OnTouchListene
 				two = transformedPoints[1];
 				three = transformedPoints[2];
 				four = transformedPoints[3];
-				four.x = four.x + 0.1f * (four.x - two.x);
-				four.y = four.y + 0.1f * (four.y - two.y);
+				if(version== -1){
+					four.x = four.x + 0.1f * (four.x - two.x);
+					four.y = four.y + 0.1f * (four.y - two.y);
+				}else if(version == 1){
+					four.x = four.x + 0.2f * (four.x - two.x);
+					four.y = four.y + 0.2f * (four.y - two.y);
+				}else if(version == 2){
+					four.x = four.x + 0.1f * (four.x - two.x);
+					four.y = four.y + 0.1f * (four.y - two.y);
+				}else if(version == 3){
+					four.x = four.x + 0.1f * (four.x - two.x);
+					four.y = four.y + 0.1f * (four.y - two.y);
+				}else if(version == 4){
+					four.x = four.x + 0.1f * (four.x - two.x);
+					four.y = four.y + 0.1f * (four.y - two.y);
+				}else if(version == 5){
+					four.x = four.x + 0.05f * (four.x - two.x);
+					four.y = four.y + 0.05f * (four.y - two.y);
+				}else if(version == 6){
+					four.x = four.x + 0.05f * (four.x - two.x);
+					four.y = four.y + 0.05f * (four.y - two.y);
+				}else if(version == 7){
+					four.x = four.x + 0.05f * (four.x - two.x);
+					four.y = four.y + 0.05f * (four.y - two.y);
+				}else if(version == 8){
+					four.x = four.x + 0.05f * (four.x - two.x);
+					four.y = four.y + 0.05f * (four.y - two.y);
+				}else if(version == 9){
+					four.x = four.x + 0.05f * (four.x - two.x);
+					four.y = four.y + 0.05f * (four.y - two.y);
+				}else if(version == 10){
+					four.x = four.x + 0.05f * (four.x - two.x);
+					four.y = four.y + 0.05f * (four.y - two.y);
+				}
+
 				requestLayout();
 				mOnQRCodeReadListener.onQRCodeRead(result.getText(), transformedPoints);
 
@@ -308,7 +437,14 @@ public class QRCodeReaderView extends SurfaceView implements View.OnTouchListene
 		return transformedPoints;
 		
 	}
-
+	@Override
+	public boolean onTouch(View v, MotionEvent event) {
+		Log.d("Touched" , "x" + event.getX()+"y" + event.getX());
+		if(one != null && two != null  && three != null  && four != null && IsPointInsideRegion(event.getX(),event.getY())){
+			Log.d("Toouched","inside");
+		}
+		return false;
+	}
 	public boolean IsPointInsideRegion(float xp, float yp){
 		Polygon.Builder poly = new Polygon.Builder();
 		poly.addVertex(new Point(one.x,one.y));
