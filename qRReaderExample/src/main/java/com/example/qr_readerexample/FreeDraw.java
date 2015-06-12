@@ -86,17 +86,23 @@ public class FreeDraw extends Activity {
                 }
             });
         }
+        resetAllButtonsColors();
+        drawButton.setBackgroundColor(Color.DKGRAY);
         saveButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                Log.d("Save image","save button clicked");
+                resetAllButtonsColors();
+                saveButton.setBackgroundColor(Color.DKGRAY);
                 drawView.saveBitmap();
+                goBackToDecoderActivity();
                 return false;
             }
         });
         moveButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                resetAllButtonsColors();
+                moveButton.setBackgroundColor(Color.DKGRAY);
                 drawView.setTool(3);
                 return false;
             }
@@ -104,13 +110,22 @@ public class FreeDraw extends Activity {
         drawButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                Log.d("Save image", "save button clicked");
+                resetAllButtonsColors();
+                drawButton.setBackgroundColor(Color.DKGRAY);
                 drawView.setTool(1);
                 return false;
             }
         });
     }
-
+    public void resetAllButtonsColors(){
+        moveButton.setBackgroundColor(Color.GRAY);
+        saveButton.setBackgroundColor(Color.GRAY);
+        drawButton.setBackgroundColor(Color.GRAY);
+    }
+    public void goBackToDecoderActivity(){
+        Intent intent = new Intent(this, DecoderActivity.class);
+        startActivity(intent);
+    }
     public void paintClicked(View view){
         //use chosen color
         if(view!=currPaint){

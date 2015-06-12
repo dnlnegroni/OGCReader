@@ -2,6 +2,7 @@ package com.example.qr_readerexample;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Environment;
@@ -126,8 +127,14 @@ public class DrawingView extends View {
         canvas.drawBitmap(canvasBitmap,new Rect(0,0,canvasBitmap.getWidth(),canvasBitmap.getHeight()),rect,canvasPaint);
 //        canvas.drawBitmap(canvasBitmap, 0, 0, canvasPaint);
         Path trasPat = new Path();
-        trasPat.addPath(drawPath,xtras*zoom,ytras*zoom);
+        Matrix matrix = new Matrix();
+        matrix.setScale(1/zoom,1/zoom);
+        matrix.postTranslate(xtras, ytras);
+        trasPat.addPath(drawPath, matrix);
+        drawPaint.setStrokeWidth(drawPaint.getStrokeWidth() * zoom);
         canvas.drawPath(trasPat, drawPaint);
+        drawPaint.setStrokeWidth(drawPaint.getStrokeWidth() / zoom);
+
         Log.d("Draw", "CanvasBitmap size :" + canvasBitmap.getWidth() + "," + canvasBitmap.getHeight());
         Log.d("Draw", "Canvas size :"  +  canvas.getWidth()+ "," + canvas.getHeight() );
         Log.d("Draw","View size :" + this.getWidth() + "," + this.getHeight());
@@ -149,13 +156,18 @@ public class DrawingView extends View {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
 
-                    drawPath.moveTo(touchX-xtras*zoom, touchY-ytras*zoom);
+                    drawPath.moveTo((touchX-xtras)*zoom, (touchY-ytras)*zoom);
                     break;
                 case MotionEvent.ACTION_MOVE:
-                    drawPath.lineTo(touchX - xtras*zoom, touchY-ytras*zoom);
+                    drawPath.lineTo((touchX - xtras)*zoom, (touchY-ytras)*zoom);
                     break;
                 case MotionEvent.ACTION_UP:
-                    drawCanvas.drawPath(drawPath, drawPaint);
+                    Matrix matrix = new Matrix();
+                    matrix.setScale(1/(zoom*zoom),1/(zoom*zoom));
+//                    //matrix.postTranslate(xtras, ytras);
+                    Path path = new Path();
+                    path.addPath(drawPath,matrix);
+                    drawCanvas.drawPath(path, drawPaint);
                     drawPath.reset();
                     break;
                 default:
