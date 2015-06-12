@@ -39,10 +39,6 @@ public class QREntity extends ParseObject {
         public  ParseFile getRepresentation(){
 
             ParseFile file =  this.getParseFile("ImageFile");
-
-//            byte[] image = file.getData();
-//            Bitmap bitmap = BitmapFactory .decodeByteArray(image, 0, image.length);
-
             return file;
         }
 }

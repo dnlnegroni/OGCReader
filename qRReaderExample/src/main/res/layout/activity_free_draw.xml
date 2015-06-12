@@ -15,11 +15,11 @@
         android:orientation="horizontal" >
 
         <ImageButton
-            android:id="@+id/new_btn"
+            android:id="@+id/move_btn"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
-            android:contentDescription="@string/start_new"
-            android:src="@drawable/new_pic" />
+            android:contentDescription="Move"
+            android:src="@drawable/move_icon" />
         <ImageButton
             android:id="@+id/draw_btn"
             android:layout_width="wrap_content"

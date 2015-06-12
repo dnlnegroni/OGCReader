@@ -99,6 +99,8 @@ public class QRCodeReaderView extends SurfaceView implements View.OnTouchListene
 	private int version = -1;
 	Bitmap bitmap = null;
 	QREntity qrEntity;
+	private String lastQRURL;
+
 
 	public QRCodeReaderView(Context context) {
 		super(context);
@@ -360,17 +362,19 @@ public class QRCodeReaderView extends SurfaceView implements View.OnTouchListene
 		if (lastQrFrame!=null){
 			Date now = new Date();
 			if (now.getTime()-lastQrFrame.getTime()>800) {
-				one = null;
-				two = null;
-				three = null;
-				four = null;
-				requestLayout();
+				hideRepresentation();
 			}
 
 		}
 	}
 
-
+	public void hideRepresentation(){
+		one = null;
+		two = null;
+		three = null;
+		four = null;
+		requestLayout();
+	}
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
@@ -389,7 +393,7 @@ public class QRCodeReaderView extends SurfaceView implements View.OnTouchListene
 			wallpath.lineTo(one.x, one.y); // there is a setLastPoint action but i found it not to work as expected
 			canvas.drawPath(wallpath, wallpaint);
 			if(qrEntity != null){
-				if (bitmap != null) {
+				if (bitmap != null && (lastQRURL == null || lastQRURL.equals(qrEntity.getQRURL()))) {
 					//Queste due righe disegnano la bitmap partendo dai quattro vertici
 					float[] po = {two.x, two.y, three.x, three.y, one.x, one.y, four.x, four.y};
 					canvas.drawBitmapMesh(bitmap, 1, 1, po, 0, null, 0, null);
@@ -406,6 +410,7 @@ public class QRCodeReaderView extends SurfaceView implements View.OnTouchListene
 								}
 							}
 						});
+						lastQRURL = qrEntity.getQRURL();
 
 				}
 			}

@@ -49,6 +49,7 @@ public class DecoderActivity extends Activity implements OnQRCodeReadListener {
 	protected void onStop() {
 		Camera camera = mydecoderview.getCameraManager().getCamera();
 		super.onStop();
+		mydecoderview.hideRepresentation();
 		if (camera != null) {
 			camera.stopPreview();
 		}
@@ -102,7 +103,7 @@ public class DecoderActivity extends Activity implements OnQRCodeReadListener {
 	private String lastQRURL;
 	@Override
 	public void onQRCodeRead(String text, PointF[] points) {
-		mydecoderview.invalidate();
+
 		if(lastQRURL == null || !lastQRURL.equals(text)) {
 			lastQRURL = text;
 			ParseQuery<QREntity> query = ParseQuery.getQuery(QREntity.class);
@@ -121,7 +122,6 @@ public class DecoderActivity extends Activity implements OnQRCodeReadListener {
 							QREntity entity = new QREntity();
 							entity.setQRURL(stext);
 							Bitmap bitmap = Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888);
-
 							Canvas canvas = new Canvas(bitmap);
 							canvas.drawColor(Color.argb(255, 255, 255, 255));
 							entity.setRepresentation(bitmap);
@@ -135,6 +135,7 @@ public class DecoderActivity extends Activity implements OnQRCodeReadListener {
 				}
 			});
 		}
+		mydecoderview.invalidate();
 
 	}
 

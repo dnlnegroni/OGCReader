@@ -34,6 +34,8 @@ public class FreeDraw extends Activity {
     private String qrurl;
     private  QREntity qrEntity;
     private ImageButton saveButton;
+   private ImageButton moveButton;
+    private ImageButton drawButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +46,8 @@ public class FreeDraw extends Activity {
         currPaint = (ImageButton)paintLayout.getChildAt(0);
         currPaint.setImageDrawable(getResources().getDrawable(R.drawable.paint_pressed));
         saveButton = (ImageButton) findViewById(R.id.save_btn);
+        moveButton = (ImageButton) findViewById(R.id.move_btn);
+        drawButton = (ImageButton) findViewById(R.id.draw_btn);
         Intent intent = getIntent();
         qrurl =  intent.getStringExtra("QRURL");
 
@@ -90,7 +94,21 @@ public class FreeDraw extends Activity {
                 return false;
             }
         });
-
+        moveButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                drawView.setTool(3);
+                return false;
+            }
+        });
+        drawButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                Log.d("Save image", "save button clicked");
+                drawView.setTool(1);
+                return false;
+            }
+        });
     }
 
     public void paintClicked(View view){

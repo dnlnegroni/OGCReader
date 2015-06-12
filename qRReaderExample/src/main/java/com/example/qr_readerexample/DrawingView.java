@@ -2,8 +2,11 @@ package com.example.qr_readerexample;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Environment;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -38,8 +41,21 @@ public class DrawingView extends View {
     private Bitmap canvasBitmap;
     private Bitmap bitmap = null;
     private QREntity qrEntity = null;
+    private int tool = 1; // 1 : pennello , 2 : gomma , 3 : sposta
+    private float lastd = 0;
+    private float lastx;
+    private float lasty;
+    //queste tre variabili definiscono l'inquadramento delle variabili
+    //xtras : rappresenta la traslazione horizzontale dell'immagine prima del ridimensionamento
+    //un valore positivo rappresenta una traslazione verso destra
+    //ytras : idem con eccezione per la traslazione verticale, un valore positivo rappresenta una traslazione verso il basso
+    //zoom : rappresenta il coefficente di ridimensionamento, se l'immagine iniziale ha dimensione 10x10 e 'zoom' vale 2
+    //l'immagine rappresentata nell'Activity avrà una dimensione 20x20 (zoom*larghezza,zoom*altezza)
+    private float xtras=0,ytras=0,zoom=1;
 
-
+    public void setTool(int tool){
+      this.tool = tool;
+    }
 
 
 
@@ -67,6 +83,7 @@ public class DrawingView extends View {
         super.onSizeChanged(w, h, oldw, oldh);
         if(bitmap!= null){
             canvasBitmap = convertToMutable(Bitmap.createBitmap(bitmap,0, 0, w,h));
+            centerImage();
         }else{
             canvasBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         }
@@ -78,14 +95,49 @@ public class DrawingView extends View {
     public void redrawBitmap( int x, int y,int w, int h){
         canvasBitmap = convertToMutable(Bitmap.createBitmap(bitmap, x, y, w, h));
         drawCanvas = new Canvas(canvasBitmap);
+        centerImage();
         requestLayout();
+        invalidate();
+    }
+    public void centerImage(){
+        int w = (int) (canvasBitmap.getWidth()*zoom);
+        int h = (int) (canvasBitmap.getHeight()*zoom);
+        if(w<getWidth()){
+            if(h<getHeight()){
+                xtras = (getWidth()-w)/2;
+                ytras = (getHeight()-h)/2;
+
+            }else{
+                xtras = (getWidth()-w)/2;
+            }
+        }else{
+            if(h<getHeight()){
+                ytras = (getHeight()-h)/2;
+            }
+        }
     }
     @Override
     protected void onDraw(Canvas canvas) {
         //draw view
+        int w = (int) (canvasBitmap.getWidth()*zoom);
+        int h = (int) (canvasBitmap.getHeight()*zoom);
+        RectF rect = new RectF(xtras,ytras,xtras+w,ytras+h);
 
-        canvas.drawBitmap(canvasBitmap, 0, 0, canvasPaint);
-        canvas.drawPath(drawPath, drawPaint);
+        canvas.drawBitmap(canvasBitmap,new Rect(0,0,canvasBitmap.getWidth(),canvasBitmap.getHeight()),rect,canvasPaint);
+//        canvas.drawBitmap(canvasBitmap, 0, 0, canvasPaint);
+        Path trasPat = new Path();
+        trasPat.addPath(drawPath,xtras*zoom,ytras*zoom);
+        canvas.drawPath(trasPat, drawPaint);
+        Log.d("Draw", "CanvasBitmap size :" + canvasBitmap.getWidth() + "," + canvasBitmap.getHeight());
+        Log.d("Draw", "Canvas size :"  +  canvas.getWidth()+ "," + canvas.getHeight() );
+        Log.d("Draw","View size :" + this.getWidth() + "," + this.getHeight());
+        Paint p = new Paint();
+        p.setColor(Color.BLACK);
+        p.setStrokeWidth(5f);
+        canvas.drawLine(rect.left, rect.top, rect.right, rect.top, p);
+        canvas.drawLine(rect.left,rect.bottom,rect.left,rect.top,p);
+        canvas.drawLine(rect.right,rect.top,rect.right,rect.bottom,p);
+        canvas.drawLine(rect.left,rect.bottom,rect.right,rect.bottom,p);
     }
 
     @Override
@@ -93,23 +145,69 @@ public class DrawingView extends View {
         //detect user touch
         float touchX = event.getX();
         float touchY = event.getY();
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                drawPath.moveTo(touchX, touchY);
-                break;
-            case MotionEvent.ACTION_MOVE:
-                drawPath.lineTo(touchX, touchY);
-                break;
-            case MotionEvent.ACTION_UP:
-                drawCanvas.drawPath(drawPath, drawPaint);
-                drawPath.reset();
-                break;
-            default:
-                return false;
+        if (tool != 3) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+
+                    drawPath.moveTo(touchX-xtras*zoom, touchY-ytras*zoom);
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    drawPath.lineTo(touchX - xtras*zoom, touchY-ytras*zoom);
+                    break;
+                case MotionEvent.ACTION_UP:
+                    drawCanvas.drawPath(drawPath, drawPaint);
+                    drawPath.reset();
+                    break;
+                default:
+                    return false;
+            }
+        }else {
+            switch (event.getPointerCount()) {
+                case 1:
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            lastx = touchX;
+                            lasty = touchY;
+                            break;
+                        case MotionEvent.ACTION_MOVE:
+                            xtras += touchX - lastx;
+                            ytras += touchY - lasty;
+                            lastx = touchX;
+                            lasty = touchY;
+                            break;
+                        case MotionEvent.ACTION_UP:
+                            lastx = touchX;
+                            lasty = touchY;
+                            break;
+                        default:
+                            return false;
+                    }
+                    break;
+                case 2:
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            lastd = (float)Math.sqrt(Math.pow(event.getX(0) - event.getX(1), 2) + Math.pow(event.getY(0) - event.getY(1), 2));
+                            break;
+                        case MotionEvent.ACTION_MOVE:
+                            float dis =  (float)Math.sqrt(Math.pow(event.getX(0)-event.getX(1),2)+Math.pow(event.getY(0)-event.getY(1),2));
+                            if(Math.abs(dis-lastd) < 15 && (zoom>0.1 || (dis - lastd)>0)) {
+                                zoom += (dis - lastd) / 100;
+                            }
+                            lastd = dis;
+                            break;
+                        case MotionEvent.ACTION_UP:
+                            lastd = (float)Math.sqrt(Math.pow(event.getX(0) - event.getX(1), 2) + Math.pow(event.getY(0) - event.getY(1), 2));
+                            break;
+                        default:
+                            return false;
+                    }
+            }
         }
+
         invalidate();
         return true;
     }
+
 
     public void setColor(String newColor){
         //set color
@@ -129,6 +227,7 @@ public class DrawingView extends View {
         if(w>bitmap.getWidth()){
             w = bitmap.getWidth();
         }
+
         redrawBitmap(0, 0, w, h);
     }
     /**
