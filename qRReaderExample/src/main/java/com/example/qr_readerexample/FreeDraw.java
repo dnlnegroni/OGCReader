@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
+import com.example.qr_readerexample.com.example.qr_readerexample.BrushSizeDialog;
 import com.example.qr_readerexample.com.example.qr_readerexample.model.QREntity;
 import com.parse.FindCallback;
 import com.parse.GetDataCallback;
@@ -34,13 +35,15 @@ public class FreeDraw extends Activity {
     private String qrurl;
     private  QREntity qrEntity;
     private ImageButton saveButton;
-   private ImageButton moveButton;
+    private ImageButton moveButton;
     private ImageButton drawButton;
+    private ImageButton eraseButton;
+    private BrushSizeDialog dialog;
     @Override
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_free_draw);
-
         drawView = (DrawingView) findViewById(R.id.drawing);
         LinearLayout paintLayout = (LinearLayout)findViewById(R.id.paint_colors);
         currPaint = (ImageButton)paintLayout.getChildAt(0);
@@ -48,6 +51,7 @@ public class FreeDraw extends Activity {
         saveButton = (ImageButton) findViewById(R.id.save_btn);
         moveButton = (ImageButton) findViewById(R.id.move_btn);
         drawButton = (ImageButton) findViewById(R.id.draw_btn);
+        eraseButton = (ImageButton) findViewById(R.id.erase_btn);
         Intent intent = getIntent();
         qrurl =  intent.getStringExtra("QRURL");
 
@@ -107,20 +111,45 @@ public class FreeDraw extends Activity {
                 return false;
             }
         });
+        eraseButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                resetAllButtonsColors();
+                eraseButton.setBackgroundColor(Color.DKGRAY);
+                drawView.setTool(2);
+                openBrushSizeDialog(2);
+                return false;
+            }
+        });
         drawButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 resetAllButtonsColors();
                 drawButton.setBackgroundColor(Color.DKGRAY);
                 drawView.setTool(1);
+                openBrushSizeDialog(1);
                 return false;
             }
         });
+    }
+    public void openBrushSizeDialog(int i){
+        if(dialog==null){
+            dialog = new BrushSizeDialog(this,i,drawView.getBrushSize());
+        }
+
+
+    }
+    public void setBrushSize(int s){
+        drawView.setBrushSize(s);
+        dialog.hide();
+        dialog.dismiss();
+        dialog = null;
     }
     public void resetAllButtonsColors(){
         moveButton.setBackgroundColor(Color.GRAY);
         saveButton.setBackgroundColor(Color.GRAY);
         drawButton.setBackgroundColor(Color.GRAY);
+        eraseButton.setBackgroundColor(Color.GRAY);
     }
     public void goBackToDecoderActivity(){
         Intent intent = new Intent(this, DecoderActivity.class);

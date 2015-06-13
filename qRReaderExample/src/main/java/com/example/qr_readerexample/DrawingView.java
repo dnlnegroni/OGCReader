@@ -56,6 +56,11 @@ public class DrawingView extends View {
 
     public void setTool(int tool){
       this.tool = tool;
+        if (tool == 2) {
+            drawPaint.setColor(Color.WHITE);
+        }else if(tool == 1){
+            drawPaint.setColor(paintColor);
+        }
     }
 
 
@@ -64,7 +69,12 @@ public class DrawingView extends View {
         super(context, attrs);
         setupDrawing();
     }
-
+    public void setBrushSize(int s){
+        this.drawPaint.setStrokeWidth(s);
+    }
+    public int getBrushSize(){
+       return (int)drawPaint.getStrokeWidth();
+    }
     private void setupDrawing(){
         //get drawing area setup for interaction
         drawPath = new Path();
