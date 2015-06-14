@@ -33,6 +33,12 @@
             android:contentDescription="@string/erase"
             android:src="@drawable/eraser" />
         <ImageButton
+            android:id="@+id/text_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:contentDescription="@string/text"
+            android:src="@drawable/text_icon" />
+        <ImageButton
             android:id="@+id/save_btn"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"

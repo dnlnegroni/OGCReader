@@ -6,6 +6,9 @@ import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Environment;
+import android.text.Layout;
+import android.text.StaticLayout;
+import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -46,6 +49,7 @@ public class DrawingView extends View {
     private float lastd = 0;
     private float lastx;
     private float lasty;
+    private TextDrawer textDrawer;
     //queste tre variabili definiscono l'inquadramento delle variabili
     //xtras : rappresenta la traslazione horizzontale dell'immagine prima del ridimensionamento
     //un valore positivo rappresenta una traslazione verso destra
@@ -60,8 +64,13 @@ public class DrawingView extends View {
             drawPaint.setColor(Color.WHITE);
         }else if(tool == 1){
             drawPaint.setColor(paintColor);
+        }else if (tool == 4){
+            drawPaint.setColor(paintColor);
+            textDrawer = new TextDrawer(100,paintColor,10,zoom);
+            requestLayout();
         }
     }
+
 
 
 
@@ -155,6 +164,9 @@ public class DrawingView extends View {
         canvas.drawLine(rect.left,rect.bottom,rect.left,rect.top,p);
         canvas.drawLine(rect.right,rect.top,rect.right,rect.bottom,p);
         canvas.drawLine(rect.left,rect.bottom,rect.right,rect.bottom,p);
+        if(textDrawer!=null){
+            textDrawer.onDraw(canvas,xtras,ytras,zoom);
+        }
     }
 
     @Override
@@ -162,7 +174,7 @@ public class DrawingView extends View {
         //detect user touch
         float touchX = event.getX();
         float touchY = event.getY();
-        if (tool != 3) {
+        if (tool == 1 || tool == 2) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
 
@@ -183,7 +195,7 @@ public class DrawingView extends View {
                 default:
                     return false;
             }
-        }else {
+        }else if(tool == 3){
             switch (event.getPointerCount()) {
                 case 1:
                     switch (event.getAction()) {
@@ -192,8 +204,15 @@ public class DrawingView extends View {
                             lasty = touchY;
                             break;
                         case MotionEvent.ACTION_MOVE:
-                            xtras += touchX - lastx;
-                            ytras += touchY - lasty;
+                            boolean canTraslate = (xtras<getWidth()-5 || (touchX - lastx)<0)
+                                    && (ytras<getHeight()-5 || (touchY - lasty)<0)
+                                    && (xtras+(canvasBitmap.getWidth()*zoom)>5 || (touchX - lastx)>0)
+                                    && (ytras+(canvasBitmap.getHeight()*zoom)>5 || (touchY - lasty)>0)
+                                    && (Math.sqrt(Math.pow((touchX - lastx),2)+Math.pow((touchY - lasty),2))<100);
+                            if(canTraslate) {
+                                xtras += touchX - lastx;
+                                ytras += touchY - lasty;
+                            }
                             lastx = touchX;
                             lasty = touchY;
                             break;
@@ -212,8 +231,69 @@ public class DrawingView extends View {
                             break;
                         case MotionEvent.ACTION_MOVE:
                             float dis =  (float)Math.sqrt(Math.pow(event.getX(0)-event.getX(1),2)+Math.pow(event.getY(0)-event.getY(1),2));
-                            if(Math.abs(dis-lastd) < 15 && (zoom>0.1 || (dis - lastd)>0)) {
+                            if(Math.abs(dis-lastd) < 15 && (zoom>0.3 || (dis - lastd)>0) && (zoom<30 || (dis - lastd)<0)) {
                                 zoom += (dis - lastd) / 100;
+                            }
+                            lastd = dis;
+                            break;
+                        case MotionEvent.ACTION_UP:
+                            lastd = (float)Math.sqrt(Math.pow(event.getX(0) - event.getX(1), 2) + Math.pow(event.getY(0) - event.getY(1), 2));
+                            break;
+                        default:
+                            return false;
+                    }
+            }
+        }else if(tool==4){
+            switch (event.getPointerCount()) {
+                case 1:
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+
+                            lastx = touchX;
+                            lasty = touchY;
+                            textDrawer.singleTouch(touchX,touchY);
+                            break;
+                        case MotionEvent.ACTION_MOVE:
+                            boolean canTraslate = (textDrawer.getX()+textDrawer.getSL().getWidth()<=(canvasBitmap.getWidth()*zoom)  || (touchX - lastx)<=0)
+                                    && (textDrawer.getY()+textDrawer.getSL().getHeight()<=(canvasBitmap.getHeight()*zoom) || (touchY - lasty)<=0)
+                                    && (textDrawer.getX()>=0 || (touchX - lastx)>=0)
+                                    && (textDrawer.getY()>=0 || (touchY - lasty)>=0)
+                                    && (Math.sqrt(Math.pow((touchX - lastx),2)+Math.pow((touchY - lasty),2))<50);
+                            if(canTraslate) {
+                                textDrawer.traslate((int)(touchX - lastx),(int)(touchY - lasty));
+                            }
+//                            if(textDrawer.getX()+textDrawer.getSL().getWidth()>(canvasBitmap.getWidth()*zoom)){
+//                                textDrawer.traslate((int)((canvasBitmap.getWidth()*zoom)-textDrawer.getX()+textDrawer.getSL().getWidth()),0);
+//                            }
+//                            if(textDrawer.getY()+textDrawer.getSL().getHeight()>(canvasBitmap.getHeight()*zoom)){
+//                                textDrawer.traslate(0,(int)((canvasBitmap.getHeight()*zoom)-textDrawer.getY()+textDrawer.getSL().getHeight()));
+//                            }
+//                            if(textDrawer.getX()<0){
+//                                textDrawer.traslate(-textDrawer.getX(),0);
+//                            }
+//                            if(textDrawer.getY()<0){
+//                                textDrawer.traslate(-textDrawer.getY(),0);
+//                            }
+                            lastx = touchX;
+                            lasty = touchY;
+                            break;
+                        case MotionEvent.ACTION_UP:
+                            lastx = touchX;
+                            lasty = touchY;
+                            break;
+                        default:
+                            return false;
+                    }
+                    break;
+                case 2:
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            lastd = (float)Math.sqrt(Math.pow(event.getX(0) - event.getX(1), 2) + Math.pow(event.getY(0) - event.getY(1), 2));
+                            break;
+                        case MotionEvent.ACTION_MOVE:
+                            float dis =  (float)Math.sqrt(Math.pow(event.getX(0)-event.getX(1),2)+Math.pow(event.getY(0)-event.getY(1),2));
+                            if(Math.abs(dis-lastd) < 15 && (zoom>0.3 || (dis - lastd)>0) && (zoom<30 || (dis - lastd)<0)) {
+                                textDrawer.scaleTextWidth((int)((dis - lastd) / 5));
                             }
                             lastd = dis;
                             break;

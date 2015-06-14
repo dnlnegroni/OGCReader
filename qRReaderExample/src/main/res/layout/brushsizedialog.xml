@@ -14,13 +14,15 @@
             android:layout_below="@+id/brushsizedialogtext"/>
         <ImageView
             android:id="@+id/brushsizedialogpreview"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
-            android:layout_below="@+id/brushsizedialogseekbar" />
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_below="@+id/brushsizedialogseekbar"
+            android:layout_centerHorizontal="true"
+            android:adjustViewBounds="true" />
         <Button
             android:id="@+id/brushsizedialogbutton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="OK"
-            android:layout_below="@+id/brushsizedialogseekbar" />
+            android:layout_below="@+id/brushsizedialogpreview" />
 </RelativeLayout>
