@@ -36,6 +36,9 @@ public class FreeDraw extends Activity {
     private ImageButton drawButton;
     private ImageButton eraseButton;
     private ImageButton textButton;
+    private ImageButton editTextSizeButton;
+    private ImageButton confirmTextButton;
+    private ImageButton discardTextButton;
     private BrushSizeDialog dialog;
     @Override
 
@@ -51,6 +54,9 @@ public class FreeDraw extends Activity {
         drawButton = (ImageButton) findViewById(R.id.draw_btn);
         eraseButton = (ImageButton) findViewById(R.id.erase_btn);
         textButton = (ImageButton) findViewById(R.id.text_btn);
+        editTextSizeButton = (ImageButton) findViewById(R.id.editTextSize_btn);
+        confirmTextButton = (ImageButton) findViewById(R.id.confirm_btn);
+        discardTextButton = (ImageButton) findViewById(R.id.discard_btn);
         Intent intent = getIntent();
         qrurl =  intent.getStringExtra("QRURL");
 
@@ -126,6 +132,7 @@ public class FreeDraw extends Activity {
                 resetAllButtonsColors();
                 textButton.setBackgroundColor(Color.DKGRAY);
                 drawView.setTool(4);
+                showTextButtons();
                 return false;
             }
         });
@@ -147,6 +154,16 @@ public class FreeDraw extends Activity {
 
 
     }
+    public void showTextButtons(){
+        editTextSizeButton.setVisibility(View.VISIBLE);
+        confirmTextButton.setVisibility(View.VISIBLE);
+        discardTextButton.setVisibility(View.VISIBLE);
+    }
+    public void hideTextButtons(){
+        editTextSizeButton.setVisibility(View.INVISIBLE);
+        confirmTextButton.setVisibility(View.INVISIBLE);
+        discardTextButton.setVisibility(View.INVISIBLE);
+    }
     public void setBrushSize(int s){
         drawView.setBrushSize(s);
         dialog.hide();
@@ -159,6 +176,7 @@ public class FreeDraw extends Activity {
         drawButton.setBackgroundColor(Color.GRAY);
         eraseButton.setBackgroundColor(Color.GRAY);
         textButton.setBackgroundColor(Color.GRAY);
+        hideTextButtons();
     }
     public void goBackToDecoderActivity(){
         Intent intent = new Intent(this, DecoderActivity.class);

@@ -316,6 +316,9 @@ public class DrawingView extends View {
         invalidate();
         paintColor = Color.parseColor(newColor);
         drawPaint.setColor(paintColor);
+        if(textDrawer!=null){
+            textDrawer.setColor(paintColor);
+        }
     }
 
     public void setup(Bitmap bitmap, QREntity qrEntity) {

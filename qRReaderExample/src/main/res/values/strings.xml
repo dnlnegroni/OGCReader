@@ -13,6 +13,8 @@
     <string name="save">Save</string>
     <string name="paint">Paint</string>
     <string name="text">text</string>
-
+    <string name="confirm">confirm</string>
+    <string name="discard">discard</string>
+    <string name="edittextsize">edit text size</string>
 
 </resources>

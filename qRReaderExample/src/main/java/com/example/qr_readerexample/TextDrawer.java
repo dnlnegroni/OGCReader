@@ -29,6 +29,9 @@ public class TextDrawer {
         this.zoom = zoom;
         redrawTextFrame();
     }
+    public void setColor(int color){
+        paintColor = color;
+    }
     public void redrawTextFrame(){
 
         TextPaint tp = new TextPaint();
