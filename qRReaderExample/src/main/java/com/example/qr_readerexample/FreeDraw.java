@@ -7,12 +7,12 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.example.qr_readerexample.com.example.qr_readerexample.model.QREntity;
@@ -39,7 +39,13 @@ public class FreeDraw extends Activity {
     private ImageButton editTextSizeButton;
     private ImageButton confirmTextButton;
     private ImageButton discardTextButton;
-    private BrushSizeDialog dialog;
+    private BrushSizeDialog brushDialog;
+    private TextDialog textDialog;
+    private TextSizeDialog textSizeDialog;
+    public DrawingView getDrawView() {
+        return drawView;
+    }
+
     @Override
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +63,7 @@ public class FreeDraw extends Activity {
         editTextSizeButton = (ImageButton) findViewById(R.id.editTextSize_btn);
         confirmTextButton = (ImageButton) findViewById(R.id.confirm_btn);
         discardTextButton = (ImageButton) findViewById(R.id.discard_btn);
+
         Intent intent = getIntent();
         qrurl =  intent.getStringExtra("QRURL");
 
@@ -146,13 +153,93 @@ public class FreeDraw extends Activity {
                 return false;
             }
         });
+        confirmTextButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(drawView.getTextDrawer() != null) {
+                    drawView.confirmText();
+                }
+                resetAllButtonsColors();
+                moveButton.setBackgroundColor(Color.DKGRAY);
+                drawView.setTool(3);
+                return false;
+            }
+        });
+        discardTextButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(drawView.getTextDrawer() != null) {
+                    drawView.discardText();
+                }
+                resetAllButtonsColors();
+                moveButton.setBackgroundColor(Color.DKGRAY);
+                drawView.setTool(3);
+                return false;
+            }
+        });
+        editTextSizeButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                openTextSizeDialog();
+
+                return false;
+            }
+        });
+
+
     }
     public void openBrushSizeDialog(int i){
-        if(dialog==null || !dialog.isShowing()){
-            dialog = new BrushSizeDialog(this,i,drawView.getBrushSize());
+        if(brushDialog ==null || !brushDialog.isShowing()){
+            brushDialog = new BrushSizeDialog(this,i,drawView.getBrushSize());
         }
 
 
+    }
+    public void confirmBrushSizeDialog(int s){
+        drawView.setBrushSize(s);
+        brushDialog.hide();
+        brushDialog.dismiss();
+        brushDialog = null;
+    }
+    public void openTextDialog(){
+        if(textDialog ==null || !textDialog.isShowing()){
+            textDialog = new TextDialog(this);
+        }
+
+
+    }
+    public void openTextSizeDialog(){
+        if(textSizeDialog ==null || !textSizeDialog.isShowing()){
+            textSizeDialog = new TextSizeDialog(this);
+        }
+
+
+    }
+    public void confirmTextDialog(String t) {
+        drawView.setText(t);
+        textDialog.hide();
+        textDialog.dismiss();
+        textDialog = null;
+    }
+    public void confirmTextSizeDialog(int s) {
+        drawView.setTextSize(s);
+        textSizeDialog.hide();
+        textSizeDialog.dismiss();
+        textSizeDialog = null;
+    }
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+//        String key = KeyEvent.keyCodeToString(keyCode);
+//        // key will be something like "KEYCODE_A" - extract the "A"
+//
+//        // use pattern to convert int keycode to some character
+//        Matcher matcher = KEYCODE_PATTERN.matcher(key);
+//        if (matcher.matches()) {
+//            // append character to textview
+//            mTextView.append(matcher.group(1));
+//        }
+//        // let the default implementation handle the event
+        return super.onKeyDown(keyCode, event);
     }
     public void showTextButtons(){
         editTextSizeButton.setVisibility(View.VISIBLE);
@@ -164,19 +251,17 @@ public class FreeDraw extends Activity {
         confirmTextButton.setVisibility(View.INVISIBLE);
         discardTextButton.setVisibility(View.INVISIBLE);
     }
-    public void setBrushSize(int s){
-        drawView.setBrushSize(s);
-        dialog.hide();
-        dialog.dismiss();
-        dialog = null;
-    }
+
     public void resetAllButtonsColors(){
+        resetAllExceptTextButtonsColors();
+        hideTextButtons();
+    }
+    public void resetAllExceptTextButtonsColors(){
         moveButton.setBackgroundColor(Color.GRAY);
         saveButton.setBackgroundColor(Color.GRAY);
         drawButton.setBackgroundColor(Color.GRAY);
         eraseButton.setBackgroundColor(Color.GRAY);
         textButton.setBackgroundColor(Color.GRAY);
-        hideTextButtons();
     }
     public void goBackToDecoderActivity(){
         Intent intent = new Intent(this, DecoderActivity.class);
@@ -216,4 +301,7 @@ public class FreeDraw extends Activity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
+
 }

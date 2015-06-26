@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+        <TextView
+            android:id="@+id/textsizedialogexampletext"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Example"/>
+        <SeekBar
+            android:id="@+id/textsizedialogseekbar"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:max="195"
+            android:layout_below="@+id/textsizedialogexampletext"/>
+
+        <Button
+            android:id="@+id/textsizedialogbutton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OK"
+            android:layout_below="@+id/textsizedialogseekbar" />
+</RelativeLayout>

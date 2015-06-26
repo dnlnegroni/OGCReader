@@ -1,9 +1,7 @@
 package com.example.qr_readerexample;
 
 import android.app.Dialog;
-import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -12,12 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-
-import com.example.qr_readerexample.FreeDraw;
-import com.example.qr_readerexample.R;
 
 /**
  * Created by root on 13/06/15.
@@ -71,7 +65,7 @@ public class BrushSizeDialog extends Dialog {
         show();
     }
     public void setBrushSize(){
-        drawwindow.setBrushSize(seekbar.getProgress() + 5);
+        drawwindow.confirmBrushSizeDialog(seekbar.getProgress() + 5);
     }
 
 

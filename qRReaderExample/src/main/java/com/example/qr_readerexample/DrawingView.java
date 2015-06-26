@@ -1,14 +1,14 @@
 package com.example.qr_readerexample;
 
+import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.Build;
 import android.os.Environment;
-import android.text.Layout;
-import android.text.StaticLayout;
-import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -17,6 +17,8 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.view.MotionEvent;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.LinearLayout;
 
 import com.example.qr_readerexample.com.example.qr_readerexample.model.QREntity;
 
@@ -26,7 +28,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.Arrays;
+import java.util.Date;
 
 /**
  * Created by daniele on 11/06/15.
@@ -45,11 +47,12 @@ public class DrawingView extends View {
     private Bitmap canvasBitmap;
     private Bitmap bitmap = null;
     private QREntity qrEntity = null;
-    private int tool = 1; // 1 : pennello , 2 : gomma , 3 : sposta
+    private int tool = 1; // 1 : pennello , 2 : gomma , 3 : sposta , 4 : testo
     private float lastd = 0;
     private float lastx;
     private float lasty;
     private TextDrawer textDrawer;
+    private Date lastTextTouch;
     //queste tre variabili definiscono l'inquadramento delle variabili
     //xtras : rappresenta la traslazione horizzontale dell'immagine prima del ridimensionamento
     //un valore positivo rappresenta una traslazione verso destra
@@ -84,8 +87,10 @@ public class DrawingView extends View {
     public int getBrushSize(){
        return (int)drawPaint.getStrokeWidth();
     }
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void setupDrawing(){
         //get drawing area setup for interaction
+        this.setLayerType(View.LAYER_TYPE_SOFTWARE,null);
         drawPath = new Path();
         drawPaint = new Paint();
         drawPaint.setColor(paintColor);
@@ -153,10 +158,6 @@ public class DrawingView extends View {
         drawPaint.setStrokeWidth(drawPaint.getStrokeWidth() * zoom);
         canvas.drawPath(trasPat, drawPaint);
         drawPaint.setStrokeWidth(drawPaint.getStrokeWidth() / zoom);
-
-        Log.d("Draw", "CanvasBitmap size :" + canvasBitmap.getWidth() + "," + canvasBitmap.getHeight());
-        Log.d("Draw", "Canvas size :"  +  canvas.getWidth()+ "," + canvas.getHeight() );
-        Log.d("Draw","View size :" + this.getWidth() + "," + this.getHeight());
         Paint p = new Paint();
         p.setColor(Color.BLACK);
         p.setStrokeWidth(5f);
@@ -164,7 +165,7 @@ public class DrawingView extends View {
         canvas.drawLine(rect.left,rect.bottom,rect.left,rect.top,p);
         canvas.drawLine(rect.right,rect.top,rect.right,rect.bottom,p);
         canvas.drawLine(rect.left,rect.bottom,rect.right,rect.bottom,p);
-        if(textDrawer!=null){
+        if(tool == 4){
             textDrawer.onDraw(canvas,xtras,ytras,zoom);
         }
     }
@@ -248,19 +249,18 @@ public class DrawingView extends View {
                 case 1:
                     switch (event.getAction()) {
                         case MotionEvent.ACTION_DOWN:
-
+                            lastTextTouch = new Date();
                             lastx = touchX;
                             lasty = touchY;
-                            textDrawer.singleTouch(touchX,touchY);
                             break;
                         case MotionEvent.ACTION_MOVE:
-                            boolean canTraslate = (textDrawer.getX()+textDrawer.getSL().getWidth()<=(canvasBitmap.getWidth()*zoom)  || (touchX - lastx)<=0)
-                                    && (textDrawer.getY()+textDrawer.getSL().getHeight()<=(canvasBitmap.getHeight()*zoom) || (touchY - lasty)<=0)
+                            boolean canTraslate = (textDrawer.getX()+textDrawer.getDL().getWidth()<=(canvasBitmap.getWidth()*zoom)  || (touchX - lastx)<=0)
+                                    && (textDrawer.getY()+textDrawer.getDL().getHeight()<=(canvasBitmap.getHeight()*zoom) || (touchY - lasty)<=0)
                                     && (textDrawer.getX()>=0 || (touchX - lastx)>=0)
                                     && (textDrawer.getY()>=0 || (touchY - lasty)>=0)
                                     && (Math.sqrt(Math.pow((touchX - lastx),2)+Math.pow((touchY - lasty),2))<50);
                             if(canTraslate) {
-                                textDrawer.traslate((int)(touchX - lastx),(int)(touchY - lasty));
+                                textDrawer.traslate((int)((touchX - lastx)/zoom),(int)((touchY - lasty)/zoom));
                             }
 //                            if(textDrawer.getX()+textDrawer.getSL().getWidth()>(canvasBitmap.getWidth()*zoom)){
 //                                textDrawer.traslate((int)((canvasBitmap.getWidth()*zoom)-textDrawer.getX()+textDrawer.getSL().getWidth()),0);
@@ -278,6 +278,11 @@ public class DrawingView extends View {
                             lasty = touchY;
                             break;
                         case MotionEvent.ACTION_UP:
+                            Date textTouch = new Date();
+                            Log.d("time","t:" +(textTouch.getTime()-lastTextTouch.getTime()));
+                            if(textTouch.getTime()-lastTextTouch.getTime()<300 && Math.abs(touchX - lastx)<10 && Math.abs(touchY - lasty)<10){
+                                ((FreeDraw)getContext()).openTextDialog();
+                            }
                             lastx = touchX;
                             lasty = touchY;
                             break;
@@ -391,5 +396,28 @@ public class DrawingView extends View {
     public void saveBitmap() {
         qrEntity.setRepresentation(canvasBitmap);
 
+    }
+    public TextDrawer getTextDrawer(){
+        return textDrawer;
+    }
+    public void confirmText() {
+        textDrawer.drawFinalText(drawCanvas);
+        invalidate();
+        textDrawer = null;
+    }
+
+    public void discardText() {
+        textDrawer = null;
+        invalidate();
+    }
+
+    public void setText( String t) {
+        textDrawer.setMessage(t);
+        invalidate();
+    }
+
+    public void setTextSize(int s) {
+        textDrawer.setTextsize(s);
+        invalidate();
     }
 }
